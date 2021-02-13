@@ -88,20 +88,6 @@ public class InjuryEffectStrings {
   public static final String BROKEN_LEG_EFFECT =
       "Your speed on foot is halved, and you must use a cane or crutch to move. You fall prone after using the Dash action. You have disadvantage on Dexterity checks made to balance.";
 
-  public static final String SECOND_DEGREE_BURNS_EFFECT =
-      YOU_HAVE + SPACE + String.format(DISADVANTAGE_ON_CHECKS, "Strength, Dexterity, and Constitution") + SPACE
-          + "If you already have second degree burns, you instead suffer third degree burns.";
-
-  public static final String THIRD_DEGREE_BURNS_EFFECT =
-      YOU_HAVE + SPACE + String.format(DISADVANTAGE_ON_CHECKS_AND_SAVES_DIFFERENT, "all", "Constitution") + SPACE
-          + String.format(STUNNED_ON_DAMAGE, "fire") + SPACE
-          + "If you already have third degree burns, you instead suffer fourth degree burns.";
-
-  public static final String FOURTH_DEGREE_BURNS_EFFECT =
-      YOU_HAVE + SPACE + String.format(DISADVANTAGE_ON_CHECKS_AND_SAVES_DIFFERENT, "all", "Strength, Dexterity, and Constitution") +  SPACE
-          + String.format(STUNNED_ON_DAMAGE, "fire") + SPACE
-          + "If you already have fourth degree burns, you must succeed at a DC 15 Constitution saving throw or die.";
-
   public static final String DAMAGED_FOOT_EFFECT =
       "Your speed on foot is reduced by 5 feet. You must succeed at a DC 10 Dexterity saving throw after using the Dash action or fall prone.";
 
@@ -137,11 +123,6 @@ public class InjuryEffectStrings {
 
   public static final String INDEFINITE_MADNESS_EFFECT =
       "Roll on the Indefinite Madness table in the Dungeon Masters Guide.";
-
-  public static final String MINOR_CONCUSSION_EFFECT =
-      YOU_HAVE + SPACE + String.format(DISADVANTAGE_ON_CHECKS, "Intelligence") + SPACE
-          + "If you already have a minor concussion, you have "
-          + String.format(DISADVANTAGE_ON_CHECKS_AND_SAVES_DIFFERENT, "Intelligence, Wisdom and Charisma", "concentration");
 
   public static final String MINOR_NAUSEA_EFFECT =
       "You must succeed at a DC 10 Constitution saving throw before you can consume food.";

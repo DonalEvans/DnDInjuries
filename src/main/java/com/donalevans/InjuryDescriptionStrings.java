@@ -127,11 +127,13 @@ public class InjuryDescriptionStrings {
 
   public static final String THROAT_INJURY_DESCRIPTION = String.join(SPACE, EXHAUSTION_EFFECT, disadvantageOnChecks("Constitution"), REGENERATE);
 
-  public static final String UNHARMED_DESCRIPTION = UNHARMED;
-
   public static final String VERTIGO_DESCRIPTION = String.join(SPACE, YOU_HAVE, disadvantageOnChecks("Dexterity"), REGENERATE, healsNaturallyIn("eight weeks"));
 
   public static final String WEAK_PERSONA_DESCRIPTION = String.join(SPACE, SENSE_OF_SELF, YOU_HAVE, disadvantageOnChecks("Charisma"), REGENERATE, healsNaturallyIn("four weeks"));
+
+  public static final String UNHARMED_DESCRIPTION = UNHARMED;
+
+  public static final String DEAD_DESCRIPTION = DEAD;
 
   public static final String INVALID_INJURY_DESCRIPTION = "An invalid damage type was specified.";
 }

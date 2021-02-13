@@ -49,4 +49,6 @@ public class InjuryFlavourStrings {
   public static final String SENSE_OF_SELF = "You have suffered damage to your sense of self.";
 
   public static final String UNHARMED = "You are unharmed by the attack!";
+
+  public static final String DEAD = "You are dead!";
 }

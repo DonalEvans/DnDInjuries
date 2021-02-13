@@ -1,28 +1,41 @@
 package com.donalevans;
 
+import static com.donalevans.Util.formatName;
+
 public class Duration {
-  public static int ROUNDS_PER_HOUR = 10 * 60;
+  public static int ROUNDS_PER_MINUTE = 10;
+  public static int MINUTES_PER_HOUR = 60;
   public static int HOURS_PER_DAY = 24;
   public static int DAYS_PER_WEEK = 10;
 
   public enum Unit {
-    ROUNDS, HOURS, RESTS, LONG_RESTS, DAYS, WEEKS, FOREVER;
+    ROUNDS, MINUTES, HOURS, RESTS, LONG_RESTS, DAYS, WEEKS, FOREVER
   }
 
-  private int duration;
+  private int initialDuration;
+  private int remainingDuration;
   private Unit units;
 
-  public Duration(int duration, Unit units) {
-    this.duration = duration;
+  public Duration(int initialDuration, Unit units) {
+    this.initialDuration = initialDuration;
+    this.remainingDuration = initialDuration;
     this.units = units;
   }
 
-  public int getDuration() {
-    return duration;
+  public int getInitialDuration() {
+    return initialDuration;
   }
 
-  public void setDuration(int duration) {
-    this.duration = duration;
+  public void setInitialDuration(int initialDuration) {
+    this.initialDuration = initialDuration;
+  }
+
+  public int getRemainingDuration() {
+    return remainingDuration;
+  }
+
+  public void setRemainingDuration(int remainingDuration) {
+    this.remainingDuration = remainingDuration;
   }
 
   public Unit getUnits() {
@@ -33,63 +46,96 @@ public class Duration {
     this.units = units;
   }
 
+  @Override
+  public String toString() {
+    if (units.equals(Unit.FOREVER)) {
+      return formatName(units.name());
+    }
+    return remainingDuration + " " + formatName(units.name());
+  }
+
   public static int toRounds(Duration input) {
     switch (input.units) {
       case ROUNDS:
-        return input.duration;
+        return input.remainingDuration;
+      case MINUTES:
+        return input.remainingDuration * ROUNDS_PER_MINUTE;
       case HOURS:
-        return input.duration / ROUNDS_PER_HOUR;
+        return input.remainingDuration * ROUNDS_PER_MINUTE * MINUTES_PER_HOUR;
       case DAYS:
-        return input.duration / (ROUNDS_PER_HOUR * HOURS_PER_DAY);
+        return input.remainingDuration * ROUNDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY;
       case WEEKS:
-        return input.duration / (ROUNDS_PER_HOUR * HOURS_PER_DAY * DAYS_PER_WEEK);
+        return input.remainingDuration * ROUNDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY * DAYS_PER_WEEK;
       default:
-        return -1;
+       throw new IllegalArgumentException("Invalid duration unit specified: " + input.units.name());
+    }
+  }
+
+  public static int toMinutes(Duration input) {
+    switch (input.units) {
+      case ROUNDS:
+        return input.remainingDuration / ROUNDS_PER_MINUTE;
+      case MINUTES:
+        return input.remainingDuration;
+      case HOURS:
+        return input.remainingDuration * MINUTES_PER_HOUR;
+      case DAYS:
+        return input.remainingDuration * MINUTES_PER_HOUR * HOURS_PER_DAY;
+      case WEEKS:
+        return input.remainingDuration * MINUTES_PER_HOUR * HOURS_PER_DAY * DAYS_PER_WEEK;
+      default:
+       throw new IllegalArgumentException("Invalid duration unit specified: " + input.units.name());
     }
   }
 
   public static int toHours(Duration input) {
     switch (input.units) {
       case ROUNDS:
-        return input.duration * ROUNDS_PER_HOUR;
+        return input.remainingDuration / (ROUNDS_PER_MINUTE * MINUTES_PER_HOUR);
+      case MINUTES:
+        return input.remainingDuration / MINUTES_PER_HOUR;
       case HOURS:
-        return input.duration;
+        return input.remainingDuration;
       case DAYS:
-        return input.duration / HOURS_PER_DAY;
+        return input.remainingDuration * HOURS_PER_DAY;
       case WEEKS:
-        return input.duration / (HOURS_PER_DAY * DAYS_PER_WEEK);
+        return input.remainingDuration * HOURS_PER_DAY * DAYS_PER_WEEK;
       default:
-        return -1;
+       throw new IllegalArgumentException("Invalid duration unit specified: " + input.units.name());
     }
   }
 
   public static int toDays(Duration input) {
     switch (input.units) {
       case ROUNDS:
-        return input.duration * HOURS_PER_DAY * ROUNDS_PER_HOUR;
+        return input.remainingDuration / (ROUNDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY) ;
+      case MINUTES:
+        return input.remainingDuration / (MINUTES_PER_HOUR * HOURS_PER_DAY);
       case HOURS:
-        return input.duration * HOURS_PER_DAY;
+        return input.remainingDuration / HOURS_PER_DAY;
       case DAYS:
-        return input.duration;
+        return input.remainingDuration;
       case WEEKS:
-        return input.duration / DAYS_PER_WEEK;
+        return input.remainingDuration * DAYS_PER_WEEK;
       default:
-        return -1;
+       throw new IllegalArgumentException("Invalid duration unit specified: " + input.units.name());
     }
   }
 
   public static int toWeeks(Duration input) {
     switch (input.units) {
       case ROUNDS:
-        return input.duration * DAYS_PER_WEEK * HOURS_PER_DAY * ROUNDS_PER_HOUR;
+        return input.remainingDuration / (ROUNDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY * DAYS_PER_WEEK);
+      case MINUTES:
+        return input.remainingDuration / (MINUTES_PER_HOUR * HOURS_PER_DAY * DAYS_PER_WEEK);
       case HOURS:
-        return input.duration * DAYS_PER_WEEK * HOURS_PER_DAY;
+        return input.remainingDuration / (HOURS_PER_DAY * DAYS_PER_WEEK);
       case DAYS:
-        return input.duration * DAYS_PER_WEEK;
+        return input.remainingDuration / DAYS_PER_WEEK;
       case WEEKS:
-        return input.duration;
+        return input.remainingDuration;
       default:
-        return -1;
+       throw new IllegalArgumentException("Invalid duration unit specified: " + input.units.name());
     }
   }
 

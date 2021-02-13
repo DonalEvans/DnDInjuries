@@ -23,6 +23,9 @@ public class InjuryGenerator extends JFrame{
   public InjuryGenerator() {
     generateInjuryButton.addActionListener(
         actionEvent -> {
+          if (!validateInputs()) {
+            return;
+          }
           Character character = new Character("", Integer.parseInt(maxHealthField.getText()));
           int roll;
           if (generateRollBox.isSelected()) {
@@ -31,9 +34,8 @@ public class InjuryGenerator extends JFrame{
           } else {
             roll = Integer.parseInt(rollValue.getText());
           }
-          int spillover = Integer.parseInt(spilloverField.getText());
           Injury.DamageType damageType = (Injury.DamageType) damageTypeSelector.getSelectedItem();
-          Injury injury = character.generateInjury(spillover, roll, damageType, null);
+          Injury injury = character.generateInjury(Integer.parseInt(spilloverField.getText()), roll, damageType);
           outputArea.setText(injury.getDescription());
         });
     initComponents();
@@ -49,8 +51,8 @@ public class InjuryGenerator extends JFrame{
   }
 
   private void initComponents() {
-    Arrays.asList(Injury.DamageType.values()).forEach(item -> this.damageTypeSelector.addItem(item));
-    Arrays.asList(InjuryType.values()).forEach(item -> this.injuryDescriptionSelector.addItem(item));
+    Arrays.asList(Injury.DamageType.values()).forEach(item -> damageTypeSelector.addItem(item));
+    Arrays.asList(InjuryType.values()).forEach(item -> injuryDescriptionSelector.addItem(item));
   }
 
   public static void main(String[] args) {
@@ -60,5 +62,35 @@ public class InjuryGenerator extends JFrame{
     mainWindow.pack();
     mainWindow.setResizable(false);
     mainWindow.setVisible(true);
+  }
+
+  boolean validateInputs() {
+    String errorText = "";
+    if (!generateRollBox.isSelected() && isInvalidNumberInput(rollValue.getText())) {
+      errorText = errorText.concat("Invalid value specified for roll.\n");
+    }
+    if (isInvalidNumberInput(maxHealthField.getText())) {
+      errorText = errorText.concat("Invalid value specified for max health.\n");
+    }
+    if (isInvalidNumberInput(spilloverField.getText())) {
+      errorText = errorText.concat("Invalid value specified for roll.\n");
+    }
+    if (!errorText.isEmpty()) {
+      outputArea.setText(errorText + "Please enter an integer.");
+      return false;
+    }
+    return true;
+  }
+
+  boolean isInvalidNumberInput(String rollText) {
+    if (rollText == null) {
+      return true;
+    }
+    try {
+      Integer.parseInt(rollText);
+    } catch (NumberFormatException ex) {
+      return true;
+    }
+    return false;
   }
 }

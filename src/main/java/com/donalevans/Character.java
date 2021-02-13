@@ -14,22 +14,30 @@ public class Character {
   public Character(String name, int maxHP) {
     this.name = name;
     this.maxHP = maxHP;
-    this.existingInjuries = new ArrayList<>();
+    existingInjuries = new ArrayList<>();
   }
 
   public Character(String name, int maxHP, List<Injury> existingInjuries) {
     this.name = name;
     this.maxHP = maxHP;
-    this.existingInjuries = existingInjuries;
+    this.existingInjuries = new ArrayList<>(existingInjuries);
+  }
+
+  public Injury generateInjury(int spillover, int roll, Injury.DamageType type) {
+    return generateInjury(spillover, roll, type, Injury.Direction.NONE);
+  }
+
+  public Injury generateInjury(int currentHP, int damage, int roll, Injury.DamageType type) {
+    int spillover = currentHP - damage;
+    return generateInjury(spillover, roll, type, Injury.Direction.NONE);
   }
 
   public Injury generateInjury(int spillover, int roll, Injury.DamageType type, Injury.Direction direction) {
     if (spillover >= maxHP) {
-      // Dead
-      return new Injury();
+      return new Injury.Dead();
     }
     int severity = 100 - (roll * maxHP) / spillover;
-    return new Injury(severity, type);
+    return new Injury(severity, type, direction);
   }
 
   public Injury generateInjury(int currentHP, int damage, int roll, Injury.DamageType type, Injury.Direction direction) {
@@ -42,7 +50,7 @@ public class Character {
   }
 
   public void removeInjury(Injury injuryToRemove) {
-    existingInjuries.removeIf(injury -> injury.equals(injuryToRemove));
+    existingInjuries.remove(injuryToRemove);
   }
 
   public String getName() {
