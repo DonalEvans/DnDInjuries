@@ -133,5 +133,5 @@ public class InjuryDescriptionStrings {
 
   public static final String WEAK_PERSONA_DESCRIPTION = String.join(SPACE, SENSE_OF_SELF, YOU_HAVE, disadvantageOnChecks("Charisma"), REGENERATE, healsNaturallyIn("four weeks"));
 
-  public static final String INVALID_INJURY_DESCRIPTION = "";
+  public static final String INVALID_INJURY_DESCRIPTION = "An invalid damage type was specified.";
 }

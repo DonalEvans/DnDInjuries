@@ -1,11 +1,8 @@
 package com.donalevans;
 
-import java.io.Serializable;
-
 import static com.donalevans.InjuryType.*;
 
-public class Injury implements Serializable {
-  private static final long serialVersionUID = 7010783129193852701L;
+public class Injury {
 
   //  private Duration duration = new Duration(0, Duration.Unit.ROUNDS);
   //  private BodyPart bodyPart = new BodyPart();
@@ -56,7 +53,7 @@ public class Injury implements Serializable {
     //    this.severity = calculateSeverity(severity, type);
     //    this.duration = calculateDuration();
     //    this.description = generateDescription();
-    this.description = generateDescription(severity, type).getDescriptionFormatted();
+    this.description = generateInjuryType(severity, type).getDescriptionFormatted();
   }
 
   public Injury(int severity, DamageType type, Direction direction) {
@@ -82,14 +79,7 @@ public class Injury implements Serializable {
     return null;
   }
 
-  private String generateDescription() {
-    return null;
-  }
-
-  private InjuryType generateDescription(int severity, DamageType type) {
-    if (severity <= 0) {
-      return InjuryType.UNHARMED;
-    }
+  private InjuryType generateInjuryType(int severity, DamageType type) {
     switch (type) {
       case ACID:
         return acidInjury(severity);
@@ -117,7 +107,7 @@ public class Injury implements Serializable {
       case THUNDER:
         return thunderInjury(severity);
       default:
-        return InjuryType.UNHARMED;
+        return INVALID_INJURY;
     }
   }
 
@@ -173,8 +163,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return MINOR_DISFIGUREMENT;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 
@@ -198,8 +187,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return BROKEN_NOSE;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 
@@ -223,8 +211,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return ANOSMIA;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 
@@ -248,8 +235,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return FIRST_DEGREE_BURNS;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 
@@ -273,8 +259,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return FLASH_BURNS;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 
@@ -298,8 +283,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return NECROTIC_DISCOLOURATION;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 
@@ -323,8 +307,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return MINOR_DISFIGUREMENT;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 
@@ -348,8 +331,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return MINOR_NAUSEA;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 
@@ -373,8 +355,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return SHORT_TERM_MADNESS;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 
@@ -398,8 +379,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return HAIR_LOSS_AND_COSMETIC_DAMAGE;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 
@@ -423,8 +403,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return MINOR_DISFIGUREMENT;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 
@@ -448,8 +427,7 @@ public class Injury implements Serializable {
     } else if (severity > 0) {
       return SEVERE_BRUISING;
     } else {
-      // Shouldn't be possible
-      return null;
+      return UNHARMED;
     }
   }
 }

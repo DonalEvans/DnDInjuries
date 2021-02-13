@@ -1,7 +1,8 @@
 package com.donalevans;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
 
 import static com.donalevans.InjuryDescriptionStrings.*;
 
@@ -82,27 +83,39 @@ public enum InjuryType {
   }
 
   public String getDescription() {
-    return this.description;
+    return description;
   }
 
   public String getDescriptionFormatted() {
-    String output = getNameFormatted();
-    return output + ": " + this.description;
+    return formatName(name()) + ": " + description;
   }
 
-  public String getNameFormatted() {
-    String[] words = this.name().split("_");
-    List<String> outputWords = new ArrayList<>();
-    for(String word : words) {
-      word = word.toLowerCase();
-      outputWords.add(java.lang.Character.toString(word.charAt(0)).toUpperCase().concat(word.substring(1)));
+  @NotNull
+  public String formatName(String name) {
+    if (name == null || name.length() < 1) {
+      return "";
     }
-    return String.join(" ", outputWords);
+
+    return Arrays.stream(name.split("_"))
+            .map(String::toLowerCase)
+            .map(this::firstCharToUppercase)
+            .collect(Collectors.joining(" "))
+            .replaceAll("\\s+", " ");
+  }
+
+  @NotNull
+  private String firstCharToUppercase(String word) {
+    if (word.isEmpty()) {
+      return "";
+    }
+    return java.lang.Character.toString(word.charAt(0))
+            .toUpperCase()
+            .concat(word.substring(1));
   }
 
   @Override
   public String toString() {
-    return getNameFormatted();
+    return formatName(name());
   }
 }
 
