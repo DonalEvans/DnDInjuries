@@ -1,9 +1,12 @@
 package com.donalevans;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class Character {
+public class Character implements Serializable {
+  private static final long serialVersionUID = 396016709724933486L;
   private String name;
   private int maxHP;
   private List<Injury> existingInjuries;
@@ -75,5 +78,27 @@ public class Character {
 
   public void setExistingInjuries(List<Injury> existingInjuries) {
     this.existingInjuries = existingInjuries;
+  }
+
+  @Override
+  public String toString() {
+    return name + ", Max HP = " + maxHP;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Character character = (Character) o;
+    return maxHP == character.getMaxHP() && name.equals(character.getName()) && existingInjuries.equals(character.getExistingInjuries());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, maxHP, existingInjuries);
   }
 }

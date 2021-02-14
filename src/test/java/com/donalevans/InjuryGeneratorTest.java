@@ -1,19 +1,31 @@
 package com.donalevans;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.*;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
+import static com.donalevans.SaveFileIO.FILE_EXTENSION;
+import static javax.swing.JFileChooser.APPROVE_OPTION;
+import static javax.swing.JFileChooser.CANCEL_OPTION;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,58 +39,60 @@ public class InjuryGeneratorTest {
   }
 
   @Test
-  public void generateInjuryCreatesCharacterAndGeneratesInjuryIfInputsAreValid() {
+  public void getInjuryFromSelectedCharacterReturnsInjury() {
     doReturn("").when(injuryGenerator).validateIntegerInputs();
-    int expectedRoll = 1;
-    doReturn(String.valueOf(expectedRoll)).when(injuryGenerator).getRollText();
-    int expectedSpillover = 2;
-    doReturn(String.valueOf(expectedSpillover)).when(injuryGenerator).getSpilloverText();
-    doReturn(false).when(injuryGenerator).isRollBoxSelected();
+    Character characterMock = mock(Character.class);
+    doReturn(characterMock).when(injuryGenerator).getSelectedCharacter();
 
-    Character mockCharacter = mock(Character.class);
-    doReturn(mockCharacter).when(injuryGenerator).createCharacter();
-
-    Injury mockInjury = mock(Injury.class);
-    String testDescription = "testDescription";
-    when(mockInjury.getDescription()).thenReturn(testDescription);
-
+    String rollText = "1";
+    int expectedRoll = Integer.parseInt(rollText);
+    doReturn(rollText).when(injuryGenerator).getRollText();
+    String spilloverText = "2";
+    int expectedSpillover = Integer.parseInt(spilloverText);
+    doReturn(spilloverText).when(injuryGenerator).getSpilloverText();
     Injury.DamageType expectedDamageType = Injury.DamageType.ACID;
     doReturn(expectedDamageType).when(injuryGenerator).getDamageType();
 
-    when(mockCharacter.generateInjury(expectedSpillover, expectedRoll, expectedDamageType)).thenReturn(mockInjury);
+    Injury injuryMock = mock(Injury.class);
+    when(characterMock.generateInjury(expectedSpillover, expectedRoll, expectedDamageType)).thenReturn(injuryMock);
 
-    injuryGenerator.generateInjury();
-
-    verify(injuryGenerator).createCharacter();
-    verify(mockCharacter).generateInjury(expectedSpillover, expectedRoll, expectedDamageType);
-    verify(injuryGenerator).setOutputAreaText(testDescription);
+    assertThat(injuryGenerator.getInjuryFromSelectedCharacter(), equalTo(injuryMock));
+    verify(characterMock).generateInjury(expectedSpillover, expectedRoll, expectedDamageType);
   }
 
   @Test
-  public void generateInjuryGeneratesRandomRollIfRollBoxIsSelected() {
+  public void getInjuryFromSelectedCharacterThrowsWhenValidateIntegerInputsReturnsNonEmptyString() {
+    String invalidValueText = "Error text";
+    doReturn(invalidValueText).when(injuryGenerator).validateIntegerInputs();
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> injuryGenerator.getInjuryFromSelectedCharacter());
+    assertThat(ex.getMessage(), equalTo(invalidValueText + "Please enter an integer."));
+  }
+
+  @Test
+  public void getInjuryFromSelectedCharacterThrowsWhenGetSelectedCharacterReturnsNull() {
     doReturn("").when(injuryGenerator).validateIntegerInputs();
-    doReturn(true).when(injuryGenerator).isRollBoxSelected();
-    doReturn("1").when(injuryGenerator).getSpilloverText();
-
-    Character mockCharacter = mock(Character.class);
-    doReturn(mockCharacter).when(injuryGenerator).createCharacter();
-
-    Injury mockInjury = mock(Injury.class);
-    when(mockCharacter.generateInjury(anyInt(), anyInt(), any())).thenReturn(mockInjury);
-
-    injuryGenerator.generateInjury();
-
-    verify(injuryGenerator).getRandom();
-    verify(injuryGenerator, never()).getRollText();
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> injuryGenerator.getInjuryFromSelectedCharacter());
+    assertThat(ex.getMessage(), equalTo("Create new character before creating or removing injuries."));
   }
 
   @Test
-  public void generateInjuryReturnsEarlyAndSetsOutputTextIfValidateIntegerInputsReturnsNonEmptyString() {
-    String testErrorText = "Error.";
-    doReturn(testErrorText).when(injuryGenerator).validateIntegerInputs();
-    injuryGenerator.generateInjury();
-    verify(injuryGenerator).setOutputAreaText(testErrorText + "Please enter an integer.");
-    verify(injuryGenerator, never()).createCharacter();
+  public void removeInjuryFromCharacterRemovesInjuryFromCharacter() {
+    Character characterMock = mock(Character.class);
+    doReturn(characterMock).when(injuryGenerator).getSelectedCharacter();
+    Injury injuryMock = mock(Injury.class);
+
+    injuryGenerator.removeInjuryFromCharacter(injuryMock);
+
+    verify(characterMock).removeInjury(injuryMock);
+  }
+
+  @Test
+  public void removeInjuryFromCharacterThrowsWhenSelectedCharacterIsNull() {
+    doReturn(null).when(injuryGenerator).getSelectedCharacter();
+    Injury injuryMock = mock(Injury.class);
+
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> injuryGenerator.removeInjuryFromCharacter(injuryMock));
+    assertThat(ex.getMessage(), equalTo("Create new character before creating or removing injuries."));
   }
 
   @Test
@@ -146,5 +160,388 @@ public class InjuryGeneratorTest {
     assertFalse(injuryGenerator.isInvalidNumberInput("1"));
     assertFalse(injuryGenerator.isInvalidNumberInput("0"));
     assertFalse(injuryGenerator.isInvalidNumberInput("-1"));
+  }
+
+  @Test
+  public void generateInjurySetsOutputAreaText() {
+    Injury injuryMock = mock(Injury.class);
+    String descriptionString = "description";
+    when(injuryMock.getDescription()).thenReturn(descriptionString);
+    doReturn(injuryMock).when(injuryGenerator).getInjuryFromSelectedCharacter();
+
+    injuryGenerator.generateInjury();
+
+    verify(injuryGenerator).setOutputAreaText(descriptionString);
+  }
+
+  @Test
+  public void generateInjurySetsOutputAreaErrorTextWhenExceptionIsThrown() {
+    String exceptionMessage = "exception message";
+    IllegalArgumentException ex = new IllegalArgumentException(exceptionMessage);
+    doThrow(ex).when(injuryGenerator).getInjuryFromSelectedCharacter();
+
+    injuryGenerator.generateInjury();
+
+    verify(injuryGenerator).setOutputAreaText(exceptionMessage);
+    verify(injuryGenerator, times(1)).setOutputAreaText(anyString());
+  }
+
+  @Test
+  public void generateAndAddInjuryAddsInjuryToCharacterAndSetsOutputAreaText() {
+    Injury injuryMock = mock(Injury.class);
+    String descriptionString = "description";
+    when(injuryMock.getDescription()).thenReturn(descriptionString);
+    when(injuryMock.getInjuryType()).thenReturn(InjuryType.BRAIN_INJURY);
+    doReturn(injuryMock).when(injuryGenerator).getInjuryFromSelectedCharacter();
+
+    Character characterMock = mock(Character.class);
+    doReturn(characterMock).when(injuryGenerator).getSelectedCharacter();
+
+    injuryGenerator.generateAndAddInjury();
+
+    verify(injuryGenerator).setOutputAreaText(descriptionString);
+    verify(characterMock).addInjury(injuryMock);
+    verify(injuryGenerator).addItemToSelector(injuryMock);
+  }
+
+  @Test
+  public void generateAndAddInjurySetsOutputAreaTextAndDoesNotAddInjuryWhenInjuryTypeIsUNHARMED() {
+    Injury injuryMock = mock(Injury.class);
+    String descriptionString = "description";
+    when(injuryMock.getDescription()).thenReturn(descriptionString);
+    when(injuryMock.getInjuryType()).thenReturn(InjuryType.UNHARMED);
+    doReturn(injuryMock).when(injuryGenerator).getInjuryFromSelectedCharacter();
+
+    Character characterMock = mock(Character.class);
+    doReturn(characterMock).when(injuryGenerator).getSelectedCharacter();
+
+    injuryGenerator.generateAndAddInjury();
+
+    verify(injuryGenerator).setOutputAreaText(descriptionString);
+    verify(characterMock, never()).addInjury(injuryMock);
+    verify(injuryGenerator, never()).addItemToSelector(injuryMock);
+  }
+
+  @Test
+  public void generateAndAddInjurySetsOutputAreaErrorTextAndDoesNotAddInjuryWhenExceptionIsThrown() {
+    String exceptionMessage = "exception message";
+    IllegalArgumentException ex = new IllegalArgumentException(exceptionMessage);
+    doThrow(ex).when(injuryGenerator).getInjuryFromSelectedCharacter();
+
+    injuryGenerator.generateAndAddInjury();
+
+    verify(injuryGenerator).setOutputAreaText(exceptionMessage);
+    verify(injuryGenerator, times(1)).setOutputAreaText(anyString());
+    verify(injuryGenerator, never()).getSelectedCharacter();
+  }
+
+  @Test
+  public void addNewCharacterAddsCharacterToSelectorIfNotPresent() {
+    doReturn(false).when(injuryGenerator).isInvalidNumberInput(anyString());
+    String characterName = "name";
+    doReturn(characterName).when(injuryGenerator).getCharacterNameText();
+
+    Character characterMock = mock(Character.class);
+    doReturn(characterMock).when(injuryGenerator).createCharacter();
+
+    doReturn(false).when(injuryGenerator).selectorContainsItem(characterMock);
+
+    injuryGenerator.addNewCharacter();
+
+    verify(injuryGenerator).addItemToSelector(characterMock);
+    verify(injuryGenerator, never()).setOutputAreaText(anyString());
+  }
+
+  @Test
+  public void addNewCharacterDoesNotAddCharacterToSelectorIfPresent() {
+    doReturn(false).when(injuryGenerator).isInvalidNumberInput(anyString());
+    String characterName = "name";
+    doReturn(characterName).when(injuryGenerator).getCharacterNameText();
+
+    Character characterMock = mock(Character.class);
+    doReturn(characterMock).when(injuryGenerator).createCharacter();
+
+    doReturn(true).when(injuryGenerator).selectorContainsItem(characterMock);
+
+    injuryGenerator.addNewCharacter();
+
+    verify(injuryGenerator, never()).addItemToSelector(characterMock);
+    verify(injuryGenerator, never()).setOutputAreaText(anyString());
+  }
+
+  @Test
+  public void addNewCharacterDoesNotAddCharacterToSelectorAndSetsOutputErrorTextIfMaxHealthIsInvalid() {
+    doReturn(true).when(injuryGenerator).isInvalidNumberInput(anyString());
+    String characterName = "name";
+    doReturn(characterName).when(injuryGenerator).getCharacterNameText();
+
+    injuryGenerator.addNewCharacter();
+
+    verify(injuryGenerator, never()).createCharacter();
+    verify(injuryGenerator, never()).addItemToSelector(any());
+    verify(injuryGenerator).setOutputAreaText("Invalid value specified for max health.\n");
+  }
+
+  @Test
+  public void addNewCharacterDoesNotAddCharacterToSelectorAndSetsOutputErrorTextIfCharacterNameIsInvalid() {
+    doReturn(false).when(injuryGenerator).isInvalidNumberInput(anyString());
+    String emptyString = "";
+    doReturn(null, emptyString).when(injuryGenerator).getCharacterNameText();
+
+    // Character name == null
+    injuryGenerator.addNewCharacter();
+    // Character name == ""
+    injuryGenerator.addNewCharacter();
+
+    verify(injuryGenerator, never()).addItemToSelector(any());
+    verify(injuryGenerator, times(2)).setOutputAreaText("Please enter a character name.\n");
+  }
+
+  @Test
+  public void addNewCharacterDoesNotAddCharacterToSelectorAndSetsOutputErrorTextIfMaxHealthAndCharacterNameAreInvalid() {
+    doReturn(true).when(injuryGenerator).isInvalidNumberInput(anyString());
+    String characterName = "";
+    doReturn(characterName).when(injuryGenerator).getCharacterNameText();
+
+    injuryGenerator.addNewCharacter();
+
+    verify(injuryGenerator, never()).createCharacter();
+    verify(injuryGenerator, never()).addItemToSelector(any());
+    verify(injuryGenerator).setOutputAreaText("Invalid value specified for max health.\n" +
+            "Please enter a character name.\n");
+  }
+
+  @Test
+  public void doSaveCharacterSavesCharacterAndAddsToSelectorIfNotPresent() {
+    JFileChooser chooserMock = mock(JFileChooser.class);
+    doReturn(chooserMock).when(injuryGenerator).getFileChooser();
+    when(chooserMock.showSaveDialog(any())).thenReturn(APPROVE_OPTION);
+
+    File fileMock = mock(File.class);
+    when(chooserMock.getSelectedFile()).thenReturn(fileMock);
+    String fileNameWithExtension = "test." + FILE_EXTENSION;
+    when(fileMock.getName()).thenReturn(fileNameWithExtension);
+
+    Character characterMock = mock(Character.class);
+    doReturn(characterMock).when(injuryGenerator).getSelectedCharacter();
+
+    SaveFileIO saveFileIOMock = mock(SaveFileIO.class);
+    doReturn(saveFileIOMock).when(injuryGenerator).getSaveFileIO();
+
+    when(saveFileIOMock.saveCharacter(characterMock, fileMock)).thenReturn(true);
+    doReturn(false).when(injuryGenerator).selectorContainsItem(characterMock);
+
+    injuryGenerator.doSaveCharacter();
+
+    verify(saveFileIOMock).saveCharacter(characterMock, fileMock);
+    verify(injuryGenerator).addItemToSelector(characterMock);
+    verify(injuryGenerator, never()).setOutputAreaText(anyString());
+  }
+
+  @Test
+  public void doSaveCharacterSavesCharacterAndDoesNotAddToSelectorIfPresent() {
+    JFileChooser chooserMock = mock(JFileChooser.class);
+    doReturn(chooserMock).when(injuryGenerator).getFileChooser();
+    when(chooserMock.showSaveDialog(any())).thenReturn(APPROVE_OPTION);
+
+    File fileMock = mock(File.class);
+    when(chooserMock.getSelectedFile()).thenReturn(fileMock);
+    String fileNameWithExtension = "test." + FILE_EXTENSION;
+    when(fileMock.getName()).thenReturn(fileNameWithExtension);
+
+    Character characterMock = mock(Character.class);
+    doReturn(characterMock).when(injuryGenerator).getSelectedCharacter();
+
+    SaveFileIO saveFileIOMock = mock(SaveFileIO.class);
+    doReturn(saveFileIOMock).when(injuryGenerator).getSaveFileIO();
+
+    when(saveFileIOMock.saveCharacter(characterMock, fileMock)).thenReturn(true);
+    doReturn(true).when(injuryGenerator).selectorContainsItem(characterMock);
+
+    injuryGenerator.doSaveCharacter();
+
+    verify(saveFileIOMock).saveCharacter(characterMock, fileMock);
+    verify(injuryGenerator, never()).addItemToSelector(characterMock);
+    verify(injuryGenerator, never()).setOutputAreaText(anyString());
+  }
+
+  @Test
+  public void doSaveCharacterEnsuresCorrectFileExtension() {
+    String fileNameWithExtension = "test." + FILE_EXTENSION;
+    String fileNameWithoutExtension = "test";
+    String expectedFileName = "test.dnd";
+
+    JFileChooser chooserMock = mock(JFileChooser.class);
+    doReturn(chooserMock).when(injuryGenerator).getFileChooser();
+    when(chooserMock.showSaveDialog(any())).thenReturn(APPROVE_OPTION);
+
+    File fileMock = mock(File.class);
+    when(chooserMock.getSelectedFile()).thenReturn(fileMock);
+    when(fileMock.getName()).thenReturn(fileNameWithExtension);
+
+    Character characterMock = mock(Character.class);
+    doReturn(characterMock).when(injuryGenerator).getSelectedCharacter();
+
+    SaveFileIO saveFileIOMock = mock(SaveFileIO.class);
+    doReturn(saveFileIOMock).when(injuryGenerator).getSaveFileIO();
+
+    // Try with file extension present
+    injuryGenerator.doSaveCharacter();
+
+    ArgumentCaptor<File> fileArgumentCaptor = ArgumentCaptor.forClass(File.class);
+    verify(saveFileIOMock).saveCharacter(eq(characterMock), fileArgumentCaptor.capture());
+    assertEquals(expectedFileName, fileArgumentCaptor.getValue().getName());
+
+    when(fileMock.getName()).thenReturn(fileNameWithoutExtension);
+    when(fileMock.getPath()).thenReturn(fileNameWithoutExtension);
+
+    // Try without file extension present
+    injuryGenerator.doSaveCharacter();
+
+    verify(saveFileIOMock, times(2)).saveCharacter(eq(characterMock), fileArgumentCaptor.capture());
+    assertEquals(expectedFileName, fileArgumentCaptor.getValue().getName());
+  }
+
+  @Test
+  public void doSaveCharacterOutputsErrorMessageAndAddsCharacterToSelectorIfNotPresentWhenFileCannotBeSaved() {
+    JFileChooser chooserMock = mock(JFileChooser.class);
+    doReturn(chooserMock).when(injuryGenerator).getFileChooser();
+    when(chooserMock.showSaveDialog(any())).thenReturn(APPROVE_OPTION);
+
+    File fileMock = mock(File.class);
+    when(chooserMock.getSelectedFile()).thenReturn(fileMock);
+    String fileNameWithExtension = "test." + FILE_EXTENSION;
+    when(fileMock.getName()).thenReturn(fileNameWithExtension);
+
+    Character characterMock = mock(Character.class);
+    doReturn(characterMock).when(injuryGenerator).getSelectedCharacter();
+
+    SaveFileIO saveFileIOMock = mock(SaveFileIO.class);
+    doReturn(saveFileIOMock).when(injuryGenerator).getSaveFileIO();
+
+    when(saveFileIOMock.saveCharacter(characterMock, fileMock)).thenReturn(false);
+    doReturn(false).when(injuryGenerator).selectorContainsItem(characterMock);
+
+    injuryGenerator.doSaveCharacter();
+
+    verify(saveFileIOMock).saveCharacter(characterMock, fileMock);
+    verify(injuryGenerator).addItemToSelector(characterMock);
+    verify(injuryGenerator).setOutputAreaText("Character file could not be saved.");
+  }
+
+  @Test
+  public void doSaveCharacterOutputsErrorMessageWhenNoCharacterSelected() {
+    JFileChooser chooserMock = mock(JFileChooser.class);
+    doReturn(chooserMock).when(injuryGenerator).getFileChooser();
+    when(chooserMock.showSaveDialog(any())).thenReturn(APPROVE_OPTION);
+
+    File fileMock = mock(File.class);
+    when(chooserMock.getSelectedFile()).thenReturn(fileMock);
+    String fileNameWithExtension = "test." + FILE_EXTENSION;
+    when(fileMock.getName()).thenReturn(fileNameWithExtension);
+
+    injuryGenerator.doSaveCharacter();
+
+    verify(injuryGenerator).setOutputAreaText("Create new character before saving.");
+    verify(injuryGenerator, never()).getSaveFileIO();
+    verify(injuryGenerator, never()).addItemToSelector(any());
+  }
+
+  @Test
+  public void doSaveCharacterDoesNothingIfFileSelectionIsCancelled() {
+    JFileChooser chooserMock = mock(JFileChooser.class);
+    doReturn(chooserMock).when(injuryGenerator).getFileChooser();
+    when(chooserMock.showSaveDialog(any())).thenReturn(CANCEL_OPTION);
+
+    injuryGenerator.doSaveCharacter();
+
+    verify(chooserMock, never()).getSelectedFile();
+    verify(injuryGenerator, never()).getSelectedCharacter();
+    verify(injuryGenerator, never()).setOutputAreaText(anyString());
+    verify(injuryGenerator, never()).getSaveFileIO();
+    verify(injuryGenerator, never()).addItemToSelector(any());
+  }
+
+  @Test
+  public void doLoadCharacterLoadsCharacterAndAddsToSelectorIfNotPresent() {
+    JFileChooser chooserMock = mock(JFileChooser.class);
+    doReturn(chooserMock).when(injuryGenerator).getFileChooser();
+    when(chooserMock.showDialog(any(), anyString())).thenReturn(APPROVE_OPTION);
+
+    File fileMock = mock(File.class);
+    when(chooserMock.getSelectedFile()).thenReturn(fileMock);
+
+    SaveFileIO saveFileIOMock = mock(SaveFileIO.class);
+    doReturn(saveFileIOMock).when(injuryGenerator).getSaveFileIO();
+    Character characterMock = mock(Character.class);
+    when(saveFileIOMock.loadCharacter(fileMock)).thenReturn(characterMock);
+
+    doReturn(false).when(injuryGenerator).selectorContainsItem(characterMock);
+
+    injuryGenerator.doLoadCharacter();
+
+    verify(saveFileIOMock).loadCharacter(fileMock);
+    verify(injuryGenerator).addItemToSelector(characterMock);
+  }
+
+  @Test
+  public void doLoadCharacterLoadsCharacterAndDoesNotAddToSelectorIfPresent() {
+    JFileChooser chooserMock = mock(JFileChooser.class);
+    doReturn(chooserMock).when(injuryGenerator).getFileChooser();
+    when(chooserMock.showDialog(any(), anyString())).thenReturn(APPROVE_OPTION);
+
+    File fileMock = mock(File.class);
+    when(chooserMock.getSelectedFile()).thenReturn(fileMock);
+
+    SaveFileIO saveFileIOMock = mock(SaveFileIO.class);
+    doReturn(saveFileIOMock).when(injuryGenerator).getSaveFileIO();
+    Character characterMock = mock(Character.class);
+    when(saveFileIOMock.loadCharacter(fileMock)).thenReturn(characterMock);
+
+    doReturn(true).when(injuryGenerator).selectorContainsItem(characterMock);
+
+    injuryGenerator.doLoadCharacter();
+
+    verify(saveFileIOMock).loadCharacter(fileMock);
+    verify(injuryGenerator, never()).addItemToSelector(characterMock);
+  }
+
+  @Test
+  public void doLoadCharacterDoesNothingIfFileSelectionIsCancelled() {
+    JFileChooser chooserMock = mock(JFileChooser.class);
+    doReturn(chooserMock).when(injuryGenerator).getFileChooser();
+    when(chooserMock.showDialog(any(), anyString())).thenReturn(CANCEL_OPTION);
+
+    injuryGenerator.doLoadCharacter();
+
+    verify(chooserMock, never()).getSelectedFile();
+    verify(injuryGenerator, never()).getSaveFileIO();
+    verify(injuryGenerator, never()).addItemToSelector(any());
+  }
+
+  @Test
+  public void characterSelectedCallsPopulateCharacterFieldsWithCorrectValues() {
+    String characterName = "name";
+    int maxHP = 12;
+    Injury injuryMockPresent = mock(Injury.class);
+    Injury injuryMockNotPresent = mock(Injury.class);
+    List<Injury> existingInjuries = new ArrayList<>();
+    existingInjuries.add(injuryMockPresent);
+    existingInjuries.add(injuryMockNotPresent);
+
+    Character characterMock = mock(Character.class);
+    when(characterMock.getName()).thenReturn(characterName);
+    when(characterMock.getMaxHP()).thenReturn(maxHP);
+    when(characterMock.getExistingInjuries()).thenReturn(existingInjuries);
+
+    doReturn(characterMock).when(injuryGenerator).getSelectedCharacter();
+    doReturn(false).when(injuryGenerator).selectorContainsItem(injuryMockPresent);
+    doReturn(true).when(injuryGenerator).selectorContainsItem(injuryMockNotPresent);
+
+    injuryGenerator.characterSelected();
+
+    verify(injuryGenerator).populateCharacterFields(characterName, maxHP, existingInjuries);
+    verify(injuryGenerator).addItemToSelector(injuryMockPresent);
+    verify(injuryGenerator, never()).addItemToSelector(injuryMockNotPresent);
   }
 }

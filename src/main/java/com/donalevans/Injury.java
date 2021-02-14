@@ -1,15 +1,19 @@
 package com.donalevans;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 import static com.donalevans.InjuryType.*;
 import static com.donalevans.InjuryTypeMaps.*;
 import static com.donalevans.Util.firstCharToUppercase;
 
-public class Injury {
+public class Injury implements Serializable {
 
-  private Duration duration;
+  private static final long serialVersionUID = -1203363020670015231L;
   private BodyPart bodyPart;
+  private Duration duration;
+  private InjuryType injuryType;
   private Severity severity;
-  private String description;
 
   public enum DamageType {
     ACID,
@@ -53,29 +57,33 @@ public class Injury {
 
   public Injury(int severity, DamageType type, Direction direction) {
     bodyPart = calculateBodyPart(direction);
-    this.severity = calculateSeverity(severity, type);
     duration = calculateDuration();
-    description = generateInjuryType(severity, type).getDescriptionFormatted();
+    injuryType = generateInjuryType(severity, type);
+    this.severity = calculateSeverity(severity, type);
   }
 
   private BodyPart calculateBodyPart(Direction direction) {
-    return null;
+    return new BodyPart(direction);
   }
 
   private Severity calculateSeverity(int spilloverPercent, DamageType type) {
-    return null;
+    return Severity.NONE;
   }
 
   private Duration calculateDuration() {
-    return null;
+    return new Duration(1, Duration.Unit.FOREVER);
   }
 
   public String getDescription() {
-    return description;
+    return injuryType.getDescriptionFormatted();
   }
 
-  public void setDescription(String description) {
-    this.description = description;
+  public BodyPart getBodyPart() {
+    return bodyPart;
+  }
+
+  public void setBodyPart(BodyPart bodyPart) {
+    this.bodyPart = bodyPart;
   }
 
   public Duration getDuration() {
@@ -86,12 +94,12 @@ public class Injury {
     this.duration = duration;
   }
 
-  public BodyPart getBodyPart() {
-    return bodyPart;
+  public InjuryType getInjuryType() {
+    return injuryType;
   }
 
-  public void setBodyPart(BodyPart bodyPart) {
-    this.bodyPart = bodyPart;
+  public void setInjuryType(InjuryType injuryType) {
+    this.injuryType = injuryType;
   }
 
   public Severity getSeverity() {
@@ -134,10 +142,39 @@ public class Injury {
     }
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Injury injury = (Injury) o;
+    return Objects.equals(bodyPart, injury.bodyPart) && Objects.equals(duration, injury.duration) && Objects.equals(injuryType, injury.injuryType) && severity == injury.severity;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(bodyPart, duration, injuryType, severity);
+  }
+
+  @Override
+  public String toString() {
+    return injuryType.getNameFormatted();
+  }
+
   public static class Dead extends Injury {
+    private static final long serialVersionUID = 557558176305102151L;
+
     @Override
     public String getDescription() {
       return DEAD.getDescriptionFormatted();
+    }
+
+    @Override
+    public String toString() {
+      return getDescription();
     }
   }
 }

@@ -1,71 +1,6 @@
 package com.donalevans;
 
-import static com.donalevans.InjuryDescriptionStrings.ANOSMIA_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.BLINDNESS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.BLISTERS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.BRAIN_INJURY_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.BROKEN_ARM_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.BROKEN_LEG_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.BROKEN_NOSE_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.BROKEN_RIBS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.CARDIAC_INJURY_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.DEAD_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.DEAFNESS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.DESTROYED_FOOT_OR_LEG_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.DESTROYED_HAND_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.FESTERING_WOUND_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.FIRST_DEGREE_BURNS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.FLASH_BURNS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.FOURTH_DEGREE_BURNS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.FROSTBITTEN_FOOT_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.FROSTBITTEN_HAND_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.GROIN_INJURY_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.HAIR_LOSS_AND_COSMETIC_DAMAGE_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.HAMSTRUNG_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.HORRIBLE_DISFIGUREMENT_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.INAPPROPRIATE_VOLUME_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.INDEFINITE_MADNESS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.INFLAMMATION_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.INTERNAL_INJURY_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.INVALID_INJURY_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.KIDNEY_FAILURE_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.LARGE_SKIN_TUMOURS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.LONG_TERM_MADNESS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MAJOR_CONCUSSION_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MAJOR_LIVER_DAMAGE_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MAJOR_NEURALGIA_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MAJOR_ORGAN_NECROSIS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MINOR_CONCUSSION_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MINOR_DISFIGUREMENT_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MINOR_HEADACHES_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MINOR_INTERNAL_INJURY_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MINOR_KIDNEY_DAMAGE_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MINOR_LIVER_DAMAGE_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MINOR_NAUSEA_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MINOR_NEURALGIA_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MINOR_ORGAN_NECROSIS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MUSCLE_SPASMS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.MUSCULAR_BREAKDOWN_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.NAUSEA_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.NECROTIC_DISCOLOURATION_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.NECROTIC_STENCH_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.ORGAN_DAMAGE_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.PARTIAL_BLINDNESS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.PARTIAL_DEAFNESS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.PHOBIA_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.PIERCED_STOMACH_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.SECOND_DEGREE_BURNS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.SEVERE_BRUISING_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.SEVERE_HEADACHES_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.SHORT_TERM_MADNESS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.SMALL_SKIN_TUMOURS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.SPIRITUAL_INJURY_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.SYSTEMIC_DAMAGE_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.THIRD_DEGREE_BURNS_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.THROAT_INJURY_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.UNHARMED_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.VERTIGO_DESCRIPTION;
-import static com.donalevans.InjuryDescriptionStrings.WEAK_PERSONA_DESCRIPTION;
+import static com.donalevans.InjuryDescriptionStrings.*;
 import static com.donalevans.Util.formatName;
 
 public enum InjuryType {
@@ -150,7 +85,11 @@ public enum InjuryType {
   }
 
   public String getDescriptionFormatted() {
-    return formatName(name()) + ": " + description;
+    return getNameFormatted() + ": " + description;
+  }
+
+  public String getNameFormatted() {
+    return formatName(name());
   }
 
   @Override
