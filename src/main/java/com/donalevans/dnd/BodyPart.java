@@ -1,4 +1,4 @@
-package com.donalevans;
+package com.donalevans.dnd;
 
 import java.io.Serializable;
 import java.util.Objects;

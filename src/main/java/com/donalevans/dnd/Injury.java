@@ -1,11 +1,12 @@
-package com.donalevans;
+package com.donalevans.dnd;
 
+import com.donalevans.dnd.constants.InjuryType;
 import java.io.Serializable;
 import java.util.Objects;
 
-import static com.donalevans.InjuryType.*;
-import static com.donalevans.InjuryTypeMaps.*;
-import static com.donalevans.Util.firstCharToUppercase;
+import static com.donalevans.dnd.constants.InjuryType.*;
+import static com.donalevans.dnd.constants.InjuryTypeMaps.*;
+import static com.donalevans.dnd.Util.firstCharToUppercase;
 
 public class Injury implements Serializable {
 

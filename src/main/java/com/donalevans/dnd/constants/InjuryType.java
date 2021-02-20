@@ -1,7 +1,7 @@
-package com.donalevans;
+package com.donalevans.dnd.constants;
 
-import static com.donalevans.InjuryDescriptionStrings.*;
-import static com.donalevans.Util.formatName;
+import static com.donalevans.dnd.constants.InjuryDescriptionStrings.*;
+import static com.donalevans.dnd.Util.formatName;
 
 public enum InjuryType {
   ANOSMIA(ANOSMIA_DESCRIPTION),

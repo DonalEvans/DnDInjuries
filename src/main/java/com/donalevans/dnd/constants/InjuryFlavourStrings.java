@@ -1,4 +1,4 @@
-package com.donalevans;
+package com.donalevans.dnd.constants;
 
 public class InjuryFlavourStrings {
   public static final String BROKEN_BODY_PART = "You have a broken %s.";

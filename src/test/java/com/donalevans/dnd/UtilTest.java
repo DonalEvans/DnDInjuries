@@ -1,4 +1,4 @@
-package com.donalevans;
+package com.donalevans.dnd;
 
 import java.util.Arrays;
 import org.junit.Test;
@@ -6,8 +6,8 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static com.donalevans.Util.firstCharToUppercase;
-import static com.donalevans.Util.formatName;
+import static com.donalevans.dnd.Util.firstCharToUppercase;
+import static com.donalevans.dnd.Util.formatName;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 

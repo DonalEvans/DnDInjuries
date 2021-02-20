@@ -1,5 +1,9 @@
-package com.donalevans;
+package com.donalevans.dnd.ui;
 
+import com.donalevans.dnd.Character;
+import com.donalevans.dnd.Injury;
+import com.donalevans.dnd.constants.InjuryType;
+import com.donalevans.dnd.SaveFileIO;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +15,7 @@ import javax.swing.filechooser.FileFilter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static com.donalevans.SaveFileIO.FILE_EXTENSION;
+import static com.donalevans.dnd.SaveFileIO.FILE_EXTENSION;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 
 public class InjuryGenerator extends JFrame{

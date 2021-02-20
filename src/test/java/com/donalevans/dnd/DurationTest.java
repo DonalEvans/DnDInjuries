@@ -1,5 +1,6 @@
-package com.donalevans;
+package com.donalevans.dnd;
 
+import com.donalevans.dnd.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

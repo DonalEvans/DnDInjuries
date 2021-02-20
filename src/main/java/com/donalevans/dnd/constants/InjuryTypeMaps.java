@@ -1,10 +1,10 @@
-package com.donalevans;
+package com.donalevans.dnd.constants;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static com.donalevans.InjuryType.*;
+import static com.donalevans.dnd.constants.InjuryType.*;
 
 public class InjuryTypeMaps {
   public static final TreeMap<Integer, InjuryType> acidInjuries = new TreeMap<>(getAcidInjuryMap());

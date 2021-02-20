@@ -1,5 +1,9 @@
-package com.donalevans;
+package com.donalevans.dnd.ui;
 
+import com.donalevans.dnd.Character;
+import com.donalevans.dnd.Injury;
+import com.donalevans.dnd.SaveFileIO;
+import com.donalevans.dnd.constants.InjuryType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import static com.donalevans.SaveFileIO.FILE_EXTENSION;
+import static com.donalevans.dnd.SaveFileIO.FILE_EXTENSION;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 import static javax.swing.JFileChooser.CANCEL_OPTION;
 import static org.hamcrest.CoreMatchers.equalTo;

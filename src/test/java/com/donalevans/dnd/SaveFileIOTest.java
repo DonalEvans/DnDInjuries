@@ -1,5 +1,8 @@
-package com.donalevans;
+package com.donalevans.dnd;
 
+import com.donalevans.dnd.Character;
+import com.donalevans.dnd.Injury;
+import com.donalevans.dnd.SaveFileIO;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import static com.donalevans.SaveFileIO.FILE_EXTENSION;
+import static com.donalevans.dnd.SaveFileIO.FILE_EXTENSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

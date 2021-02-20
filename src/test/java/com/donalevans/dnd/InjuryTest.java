@@ -1,8 +1,9 @@
-package com.donalevans;
+package com.donalevans.dnd;
 
+import com.donalevans.dnd.Injury;
 import org.junit.Test;
 
-import static com.donalevans.InjuryDescriptionStrings.MINOR_CONCUSSION_DESCRIPTION;
+import static com.donalevans.dnd.constants.InjuryDescriptionStrings.MINOR_CONCUSSION_DESCRIPTION;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;

@@ -1,8 +1,8 @@
-package com.donalevans;
+package com.donalevans.dnd.constants;
 
-import static com.donalevans.InjuryEffectStrings.*;
-import static com.donalevans.InjuryFlavourStrings.*;
-import static com.donalevans.InjuryRecoveryStrings.*;
+import static com.donalevans.dnd.constants.InjuryEffectStrings.*;
+import static com.donalevans.dnd.constants.InjuryFlavourStrings.*;
+import static com.donalevans.dnd.constants.InjuryRecoveryStrings.*;
 
 public class InjuryDescriptionStrings {
   public static final String ANOSMIA_DESCRIPTION = String.join(SPACE,LOSE_SMELL_TASTE, ANOSMIA_EFFECT, ANY_MAGIC_HEALING);

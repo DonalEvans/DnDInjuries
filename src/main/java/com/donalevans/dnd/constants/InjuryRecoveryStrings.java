@@ -1,4 +1,4 @@
-package com.donalevans;
+package com.donalevans.dnd.constants;
 
 public class InjuryRecoveryStrings {
   public static final String HEALS_NATURALLY_IN = "The injury heals naturally in %s.";

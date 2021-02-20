@@ -1,5 +1,7 @@
-package com.donalevans;
+package com.donalevans.dnd;
 
+import com.donalevans.dnd.Character;
+import com.donalevans.dnd.Injury;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Before;

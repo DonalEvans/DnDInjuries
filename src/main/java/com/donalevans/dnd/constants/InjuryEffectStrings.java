@@ -1,4 +1,4 @@
-package com.donalevans;
+package com.donalevans.dnd.constants;
 
 public class InjuryEffectStrings {
 

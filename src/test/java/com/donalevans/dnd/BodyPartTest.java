@@ -1,4 +1,4 @@
-package com.donalevans;
+package com.donalevans.dnd;
 
 public class BodyPartTest {
 }

@@ -1,4 +1,4 @@
-package com.donalevans;
+package com.donalevans.dnd;
 
 import java.io.File;
 import java.io.FileInputStream;

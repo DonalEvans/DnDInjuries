@@ -1,9 +1,9 @@
-package com.donalevans;
+package com.donalevans.dnd;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-import static com.donalevans.Util.formatName;
+import static com.donalevans.dnd.Util.formatName;
 
 public class Duration implements Serializable {
   private static final long serialVersionUID = -5442231928040353032L;

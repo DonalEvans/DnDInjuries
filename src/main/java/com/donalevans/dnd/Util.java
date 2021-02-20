@@ -1,4 +1,4 @@
-package com.donalevans;
+package com.donalevans.dnd;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
