@@ -1,0 +1,3 @@
+With the injury program i think it'd be nice to see what number it generates if you ask it to do it that way
+also I didn't check but is there a way to add a specific injury to someone without rolling?
+also it'd be preferable i guess if you could save a whole party at once instead of just individual characters
