@@ -39,9 +39,15 @@ public class Injury implements Serializable {
 
   public enum Direction {
     ABOVE,
+    ABOVE_LEFT,
+    ABOVE_RIGHT,
     BELOW,
+    BELOW_LEFT,
+    BELOW_RIGHT,
+    FRONT,
     FRONT_LEFT,
     FRONT_RIGHT,
+    BEHIND,
     BEHIND_LEFT,
     BEHIND_RIGHT,
     NONE
