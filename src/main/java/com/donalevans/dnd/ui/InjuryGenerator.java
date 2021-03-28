@@ -112,6 +112,7 @@ public class InjuryGenerator extends JFrame {
     if (isRollBoxSelected()) {
       Random rnd = getRandom();
       roll = rnd.nextInt(100);
+      setRollText(String.valueOf(roll));
     } else {
       roll = Integer.parseInt(getRollText());
     }
@@ -289,6 +290,10 @@ public class InjuryGenerator extends JFrame {
 
   String getRollText() {
     return rollValueField.getText();
+  }
+
+  void setRollText(String value) {
+    rollValueField.setText(value);
   }
 
   String getCharacterNameText() {

@@ -7,6 +7,7 @@ import com.donalevans.dnd.constants.InjuryType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import javax.swing.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -62,6 +64,32 @@ public class InjuryGeneratorTest {
 
     assertThat(injuryGenerator.getInjuryFromSelectedCharacter(), equalTo(injuryMock));
     verify(characterMock).generateInjury(expectedSpillover, expectedRoll, expectedDamageType);
+  }
+
+  @Test
+  public void getInjuryFromSelectedCharacterReturnsInjurySetsRollValueWhenAutoGenerateRollIsSelected() {
+    doReturn("").when(injuryGenerator).validateIntegerInputs();
+    Character characterMock = mock(Character.class);
+    doReturn(characterMock).when(injuryGenerator).getSelectedCharacter();
+
+    doReturn(true).when(injuryGenerator).isRollBoxSelected();
+    int generatedRoll = 42;
+    Random randomMock = mock(Random.class);
+    when(randomMock.nextInt(anyInt())).thenReturn(generatedRoll);
+    doReturn(randomMock).when(injuryGenerator).getRandom();
+
+    String spilloverText = "2";
+    int expectedSpillover = Integer.parseInt(spilloverText);
+    doReturn(spilloverText).when(injuryGenerator).getSpilloverText();
+    Injury.DamageType expectedDamageType = Injury.DamageType.ACID;
+    doReturn(expectedDamageType).when(injuryGenerator).getDamageType();
+
+    Injury injuryMock = mock(Injury.class);
+    when(characterMock.generateInjury(expectedSpillover, generatedRoll, expectedDamageType)).thenReturn(injuryMock);
+
+    assertThat(injuryGenerator.getInjuryFromSelectedCharacter(), equalTo(injuryMock));
+    verify(characterMock).generateInjury(expectedSpillover, generatedRoll, expectedDamageType);
+    verify(injuryGenerator).setRollText(String.valueOf(generatedRoll));
   }
 
   @Test
