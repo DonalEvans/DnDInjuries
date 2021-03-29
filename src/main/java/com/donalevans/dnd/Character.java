@@ -82,7 +82,7 @@ public class Character implements Serializable {
 
   @Override
   public String toString() {
-    return name + ", Max HP = " + maxHP;
+    return name + ", Max HP = " + maxHP + ", Number of Injuries = " + existingInjuries.size();
   }
 
   @Override

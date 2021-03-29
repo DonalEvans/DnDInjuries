@@ -56,6 +56,10 @@ public class Injury implements Serializable {
 
   public Injury() {}
 
+  public Injury(InjuryType injuryType) {
+    this.injuryType = injuryType;
+  }
+
   public Injury(int severity, DamageType type, Direction direction) {
     bodyPart = calculateBodyPart(direction);
     duration = calculateDuration();
@@ -67,10 +71,12 @@ public class Injury implements Serializable {
     return new BodyPart(direction);
   }
 
+  //TODO: Implement this properly
   private Severity calculateSeverity(int spilloverPercent, DamageType type) {
     return Severity.NONE;
   }
 
+  //TODO: Implement this properly
   private Duration calculateDuration() {
     return new Duration(1, Duration.Unit.FOREVER);
   }

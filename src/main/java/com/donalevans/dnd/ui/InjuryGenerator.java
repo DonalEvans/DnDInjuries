@@ -2,8 +2,9 @@ package com.donalevans.dnd.ui;
 
 import com.donalevans.dnd.Character;
 import com.donalevans.dnd.Injury;
-import com.donalevans.dnd.constants.InjuryType;
+import com.donalevans.dnd.Party;
 import com.donalevans.dnd.SaveFileIO;
+import com.donalevans.dnd.constants.InjuryType;
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -17,30 +18,38 @@ import javax.swing.filechooser.FileFilter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static com.donalevans.dnd.SaveFileIO.FILE_EXTENSION;
+import static com.donalevans.dnd.SaveFileIO.PARTY_FILE_EXTENSION;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 
 public class InjuryGenerator extends JFrame {
 
-  private JTextPane outputArea;
-  private JButton generateAndAddInjuryButton;
-  private JTextField spilloverField;
-  private JTextField maxHealthField;
-  private JComboBox<Injury.DamageType> damageTypeSelector;
   private JPanel mainFrame;
-  private JTextField rollValueField;
-  private JCheckBox generateRollBox;
-  private JComboBox<InjuryType> injuryDescriptionSelector;
-  private JButton describeInjuryButton;
-  private JComboBox<Character> characterSelector;
-  private JButton loadCharacterButton;
-  private JButton saveCharacterButton;
+  private JTextField partyNameField;
+  private JButton createPartyButton;
+  private JButton savePartyButton;
+  private JButton loadPartyButton;
+  private JComboBox<Party> partySelector;
   private JTextField characterNameField;
+  private JTextField maxHealthField;
+  private JButton addCharacterToPartyButton;
+  private JButton removeCharacterFromPartyButton;
+  private JButton updateCharacterButton;
+  private JComboBox<Character> characterSelector;
   private JComboBox<Injury> existingInjuriesSelector;
   private JButton describeExistingInjuryButton;
   private JButton removeSelectedInjuryButton;
+  private JTextField spilloverField;
+  private JTextField rollValueField;
+  private JComboBox<Injury.DamageType> damageTypeSelector;
+  private JCheckBox generateRollBox;
+  private JButton generateAndAddInjuryButton;
   private JButton generateInjuryButton;
-  private JButton newCharacterButton;
+  private JComboBox<InjuryType> injuryDescriptionSelector;
+  private JButton describeInjuryButton;
+  private JButton addInjuryButton;
+  private JTextPane outputArea;
+
+  private File previousSaveLoadLocation;
 
   public static void main(String[] args) {
     JFrame mainWindow = new JFrame("DnD Injury Generator");
@@ -52,50 +61,81 @@ public class InjuryGenerator extends JFrame {
   }
 
   public InjuryGenerator() {
-    newCharacterButton.addActionListener(e -> addNewCharacter());
+    createPartyButton.addActionListener(e -> createParty());
 
-    generateInjuryButton.addActionListener(e -> generateInjury());
+    loadPartyButton.addActionListener(e -> doLoadParty());
 
-    generateAndAddInjuryButton.addActionListener(e -> generateAndAddInjury());
+    savePartyButton.addActionListener(e -> doSaveParty());
 
-    describeExistingInjuryButton.addActionListener(e -> {
-      Injury injury = (Injury) existingInjuriesSelector.getSelectedItem();
-      if (injury != null) {
-        setOutputAreaText(injury.getDescription());
-      }
-    });
+    partySelector.addActionListener(e -> partyUpdated());
 
-    removeSelectedInjuryButton.addActionListener(e -> {
-      Injury injury = (Injury) existingInjuriesSelector.getSelectedItem();
-      if (injury != null) {
-        removeInjuryFromCharacter(injury);
-      }
-    });
+    addCharacterToPartyButton.addActionListener(e -> addCharacterToParty());
 
-    describeInjuryButton.addActionListener(e -> {
-      InjuryType injury = (InjuryType) injuryDescriptionSelector.getSelectedItem();
-      if (injury != null) {
-        setOutputAreaText(injury.getDescriptionFormatted());
-      }
-    });
+    removeCharacterFromPartyButton.addActionListener(e -> removeCharacterFromParty());
+
+    updateCharacterButton.addActionListener(e -> characterUpdated());
+
+    characterSelector.addActionListener(e -> characterSelected());
+
+    describeExistingInjuryButton.addActionListener(
+            e -> {
+              Injury injury = getSelectedExistingInjury();
+              if (injury != null) {
+                setOutputAreaText(injury.getDescription());
+              }
+            });
+
+    removeSelectedInjuryButton.addActionListener(e -> removeSelectedInjury());
 
     generateRollBox.addActionListener(e -> rollValueField.setEnabled(!isRollBoxSelected()));
 
-    loadCharacterButton.addActionListener(e -> doLoadCharacter());
+    generateAndAddInjuryButton.addActionListener(e -> generateAndAddInjury());
 
-    saveCharacterButton.addActionListener(e -> doSaveCharacter());
+    generateInjuryButton.addActionListener(e -> generateInjury());
 
-    characterSelector.addActionListener(e -> characterSelected());
+    describeInjuryButton.addActionListener(
+            e -> {
+              InjuryType injury = (InjuryType) injuryDescriptionSelector.getSelectedItem();
+              if (injury != null) {
+                setOutputAreaText(injury.getDescriptionFormatted());
+              }
+            });
+
+    addInjuryButton.addActionListener(e -> addSelectedInjuryToCharacter());
 
     initComponents();
   }
 
   private void initComponents() {
     Arrays.asList(Injury.DamageType.values()).forEach(item -> damageTypeSelector.addItem(item));
-    Arrays.asList(InjuryType.values()).forEach(item -> {
-      if (!item.equals(InjuryType.DEAD) && !item.equals(InjuryType.INVALID_INJURY))
-        injuryDescriptionSelector.addItem(item);
-    });
+    Arrays.asList(InjuryType.values())
+            .forEach(
+                    item -> {
+                      if (!item.equals(InjuryType.DEAD)
+                              && !item.equals(InjuryType.INVALID_INJURY)
+                              && !item.equals(InjuryType.UNHARMED)) injuryDescriptionSelector.addItem(item);
+                    });
+  }
+
+  void createParty() {
+    String name = getPartyNameText();
+    if (name == null || name.isEmpty()) {
+      setOutputAreaText("Please enter a party name.");
+      return;
+    }
+    Party party = new Party(name);
+    if (!partySelectorContainsParty(party)) {
+      addItemToSelector(party);
+      partySelector.setSelectedItem(party);
+    }
+  }
+
+  void partyUpdated() {
+    Party party = Objects.requireNonNull(getSelectedParty());
+    characterSelector.removeAllItems();
+    party.forEach(this::addItemToSelector);
+    partySelector.repaint();
+    characterUpdated();
   }
 
   @NotNull
@@ -106,7 +146,8 @@ public class InjuryGenerator extends JFrame {
     }
     Character character = getSelectedCharacter();
     if (character == null) {
-      throw new IllegalArgumentException("Create new character before creating or removing injuries.");
+      throw new IllegalArgumentException(
+              "Create new character before creating or removing injuries.");
     }
     int roll;
     if (isRollBoxSelected()) {
@@ -120,13 +161,17 @@ public class InjuryGenerator extends JFrame {
     return character.generateInjury(Integer.parseInt(getSpilloverText()), roll, damageType);
   }
 
-  void removeInjuryFromCharacter(Injury injury) {
+  void addSelectedInjuryToCharacter() {
     Character character = getSelectedCharacter();
     if (character == null) {
-      throw new IllegalArgumentException("Create new character before creating or removing injuries.");
+      throw new IllegalArgumentException(
+              "Add character to party before adding or removing injuries.");
     }
-    character.removeInjury(injury);
-    existingInjuriesSelector.removeItem(injury);
+    Injury injury = getSelectedInjury();
+    character.addInjury(injury);
+    characterUpdated();
+    addItemToSelector(injury);
+    existingInjuriesSelector.setSelectedItem(injury);
   }
 
   String validateIntegerInputs() {
@@ -177,13 +222,20 @@ public class InjuryGenerator extends JFrame {
     Character character = Objects.requireNonNull(getSelectedCharacter());
     if (!injury.getInjuryType().equals(InjuryType.UNHARMED)) {
       character.addInjury(injury);
+      characterUpdated();
       addItemToSelector(injury);
       existingInjuriesSelector.setSelectedItem(injury);
     }
     setOutputAreaText(injury.getDescription());
   }
 
-  void addNewCharacter() {
+  void addCharacterToParty() {
+    Party currentParty = getSelectedParty();
+    if (currentParty == null) {
+      setOutputAreaText("Create or load Party before adding a character.");
+      return;
+    }
+
     String errorText = "";
     if (isInvalidNumberInput(getMaxHealthText())) {
       errorText = errorText.concat("Invalid value specified for max health.\n");
@@ -197,65 +249,126 @@ public class InjuryGenerator extends JFrame {
       return;
     }
     Character character = createCharacter();
-    if (!selectorContainsItem(character)) {
-      addItemToSelector(character);
-      characterSelector.setSelectedItem(character);
-    }
+    currentParty.add(character);
+    partyUpdated();
   }
 
-  void doSaveCharacter() {
+  void removeCharacterFromParty() {
+    Party currentParty = getSelectedParty();
+    if (currentParty == null) {
+      return;
+    }
+    Character currentCharacter = getSelectedCharacter();
+    if (currentCharacter == null) {
+      return;
+    }
+    currentParty.remove(currentCharacter);
+    partyUpdated();
+  }
+
+  void doSaveParty() {
     final JFileChooser chooser = getFileChooser();
     chooser.setFileFilter(new DnDFileFilter());
     int returnVal = chooser.showSaveDialog(this);
     if (returnVal == APPROVE_OPTION) {
       File file = chooser.getSelectedFile();
-      if (!file.getName().endsWith("." + FILE_EXTENSION)) {
-        file = new File(file.getPath() + "." + FILE_EXTENSION);
+      if (!file.getName().endsWith("." + PARTY_FILE_EXTENSION)) {
+        file = new File(file.getPath() + "." + PARTY_FILE_EXTENSION);
       }
-      Character characterToSave = getSelectedCharacter();
-      if (characterToSave == null) {
-        setOutputAreaText("Create new character before saving.");
+      Party partyToSave = getSelectedParty();
+      if (partyToSave == null) {
+        setOutputAreaText("Create new party before saving.");
         return;
       }
-      boolean success = getSaveFileIO().saveCharacter(characterToSave, file);
+      boolean success = getSaveFileIO().saveParty(partyToSave, file);
       if (!success) {
-        setOutputAreaText("Character file could not be saved.");
+        setOutputAreaText("Party file could not be saved.");
       }
-      if (!selectorContainsItem(characterToSave)) {
-        addItemToSelector(characterToSave);
-        characterSelector.setSelectedItem(characterToSave);
+      previousSaveLoadLocation = file.getParentFile();
+      if (!partySelectorContainsParty(partyToSave)) {
+        addItemToSelector(partyToSave);
+        partySelector.setSelectedItem(partyToSave);
       }
     }
   }
 
-  void doLoadCharacter() {
+  void doLoadParty() {
     final JFileChooser chooser = getFileChooser();
     chooser.setFileFilter(new DnDFileFilter());
     int returnVal = chooser.showDialog(this, "Load");
     if (returnVal == APPROVE_OPTION) {
       File file = chooser.getSelectedFile();
-      Character loadedCharacter = getSaveFileIO().loadCharacter(file);
-      if (!selectorContainsItem(loadedCharacter)) {
-        addItemToSelector(loadedCharacter);
+      if (!file.getName().endsWith("." + PARTY_FILE_EXTENSION)) {
+        setOutputAreaText("Invalid file selected.");
+        return;
       }
-      characterSelector.setSelectedItem(loadedCharacter);
+      Party loadedParty;
+      try {
+        loadedParty = getSaveFileIO().loadParty(file);
+      } catch (Exception ex) {
+        setOutputAreaText("Selected file could not be loaded.");
+        return;
+      }
+      previousSaveLoadLocation = file.getParentFile();
+      if (!partySelectorContainsParty(loadedParty)) {
+        addItemToSelector(loadedParty);
+      }
+      partySelector.setSelectedItem(loadedParty);
+      if (!loadedParty.isEmpty()) {
+        characterSelector.setSelectedItem(loadedParty.iterator().next());
+      }
     }
   }
 
   void characterSelected() {
-    Character character = Objects.requireNonNull(getSelectedCharacter());
-    populateCharacterFields(character.getName(), character.getMaxHP(), character.getExistingInjuries());
+    Character character = getSelectedCharacter();
+    if (character == null) {
+      return;
+    }
+    populateCharacterFields(
+            character.getName(), character.getMaxHP(), character.getExistingInjuries());
   }
 
   void populateCharacterFields(String characterName, int maxHP, List<Injury> existingInjuries) {
     characterNameField.setText(characterName);
     maxHealthField.setText(String.valueOf(maxHP));
     existingInjuriesSelector.removeAllItems();
-    existingInjuries.forEach(injury -> {
-      if (!selectorContainsItem(injury)) {
-        addItemToSelector(injury);
+    existingInjuries.forEach(this::addItemToSelector);
+  }
+
+  void characterUpdated() {
+    Character character = getSelectedCharacter();
+    if (character == null) {
+      return;
+    }
+
+    Party party = getSelectedParty();
+    if (party == null) {
+      return;
+    }
+
+    character.setMaxHP(Integer.parseInt(getMaxHealthText()));
+
+    character.setName(getCharacterNameText());
+
+    characterSelector.repaint();
+  }
+
+  void removeSelectedInjury() {
+    Injury injury = getSelectedExistingInjury();
+    if (injury != null) {
+      Character character = getSelectedCharacter();
+      if (character == null) {
+        setOutputAreaText("Create new character before creating or removing injuries.");
+        return;
       }
-    });
+      character.removeInjury(injury);
+      characterUpdated();
+      existingInjuriesSelector.removeItem(injury);
+      if (existingInjuriesSelector.getItemCount() > 0) {
+        existingInjuriesSelector.setSelectedIndex(0);
+      }
+    }
   }
 
   // Test helper methods
@@ -266,8 +379,23 @@ public class InjuryGenerator extends JFrame {
   }
 
   @Nullable
+  Party getSelectedParty() {
+    return (Party) partySelector.getSelectedItem();
+  }
+
+  @Nullable
   Character getSelectedCharacter() {
     return (Character) characterSelector.getSelectedItem();
+  }
+
+  @Nullable
+  Injury getSelectedInjury() {
+    return new Injury((InjuryType) injuryDescriptionSelector.getSelectedItem());
+  }
+
+  @Nullable
+  Injury getSelectedExistingInjury() {
+    return (Injury) existingInjuriesSelector.getSelectedItem();
   }
 
   @NotNull
@@ -300,6 +428,10 @@ public class InjuryGenerator extends JFrame {
     return characterNameField.getText();
   }
 
+  String getPartyNameText() {
+    return partyNameField.getText();
+  }
+
   boolean isRollBoxSelected() {
     return generateRollBox.isSelected();
   }
@@ -308,29 +440,41 @@ public class InjuryGenerator extends JFrame {
     outputArea.setText(text);
   }
 
-  boolean selectorContainsItem(Object item) {
-    boolean contains = false;
-    if (item instanceof Character) {
-      contains = ((DefaultComboBoxModel<Character>) characterSelector.getModel()).getIndexOf(item) != -1;
-    } else if (item instanceof Injury) {
-      contains = ((DefaultComboBoxModel<Injury>) existingInjuriesSelector.getModel()).getIndexOf(item) != -1;
-    }
-    return contains;
+  File getPreviousSaveLoadLocation() {
+    return previousSaveLoadLocation;
+  }
+
+  boolean partySelectorContainsParty(Party party) {
+    return ((DefaultComboBoxModel<Party>) partySelector.getModel()).getIndexOf(party) != -1;
+  }
+
+  boolean characterSelectorContainsCharacter(Character character) {
+    return ((DefaultComboBoxModel<Character>) characterSelector.getModel()).getIndexOf(character)
+            != -1;
+  }
+
+  boolean existingInjuriesSelectorContainsInjury(Injury injury) {
+    return ((DefaultComboBoxModel<Injury>) existingInjuriesSelector.getModel()).getIndexOf(injury)
+            != -1;
   }
 
   void addItemToSelector(Object item) {
-    if (item instanceof Character) {
+    if (item instanceof Party) {
+      partySelector.addItem((Party) item);
+    } else if (item instanceof Character) {
       characterSelector.addItem((Character) item);
     } else if (item instanceof Injury) {
       existingInjuriesSelector.addItem((Injury) item);
     }
   }
 
-  @NotNull JFileChooser getFileChooser() {
-    return new JFileChooser();
+  @NotNull
+  JFileChooser getFileChooser() {
+    return new JFileChooser(previousSaveLoadLocation);
   }
 
-  @NotNull SaveFileIO getSaveFileIO() {
+  @NotNull
+  SaveFileIO getSaveFileIO() {
     return new SaveFileIO();
   }
 
@@ -356,15 +500,15 @@ public class InjuryGenerator extends JFrame {
     GridBagConstraints gbc;
     gbc = new GridBagConstraints();
     gbc.gridx = 2;
-    gbc.gridy = 12;
-    gbc.gridwidth = 3;
+    gbc.gridy = 13;
+    gbc.gridwidth = 5;
     gbc.fill = GridBagConstraints.VERTICAL;
     mainFrame.add(spacer1, gbc);
     injuryDescriptionSelector = new JComboBox();
     gbc = new GridBagConstraints();
     gbc.gridx = 1;
-    gbc.gridy = 10;
-    gbc.gridwidth = 4;
+    gbc.gridy = 11;
+    gbc.gridwidth = 3;
     gbc.anchor = GridBagConstraints.WEST;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     mainFrame.add(injuryDescriptionSelector, gbc);
@@ -373,254 +517,370 @@ public class InjuryGenerator extends JFrame {
     characterNameField.setPreferredSize(new Dimension(64, 30));
     gbc = new GridBagConstraints();
     gbc.gridx = 1;
-    gbc.gridy = 4;
-    gbc.gridwidth = 2;
+    gbc.gridy = 5;
     gbc.anchor = GridBagConstraints.WEST;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     mainFrame.add(characterNameField, gbc);
     existingInjuriesSelector = new JComboBox();
     gbc = new GridBagConstraints();
     gbc.gridx = 1;
-    gbc.gridy = 6;
-    gbc.gridwidth = 4;
+    gbc.gridy = 8;
+    gbc.gridwidth = 3;
     gbc.anchor = GridBagConstraints.WEST;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     mainFrame.add(existingInjuriesSelector, gbc);
-    final JPanel spacer2 = new JPanel();
-    gbc = new GridBagConstraints();
-    gbc.gridx = 5;
-    gbc.gridy = 2;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(spacer2, gbc);
-    loadCharacterButton = new JButton();
-    loadCharacterButton.setText("Load Character");
-    gbc = new GridBagConstraints();
-    gbc.gridx = 1;
-    gbc.gridy = 2;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(loadCharacterButton, gbc);
-    saveCharacterButton = new JButton();
-    saveCharacterButton.setText("Save Character");
-    gbc = new GridBagConstraints();
-    gbc.gridx = 2;
-    gbc.gridy = 2;
-    gbc.gridwidth = 3;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(saveCharacterButton, gbc);
     final JLabel label1 = new JLabel();
     label1.setText("Existing Injuries");
     gbc = new GridBagConstraints();
     gbc.gridx = 1;
-    gbc.gridy = 5;
-    gbc.gridwidth = 4;
+    gbc.gridy = 7;
+    gbc.gridwidth = 6;
     gbc.anchor = GridBagConstraints.WEST;
     mainFrame.add(label1, gbc);
     final JLabel label2 = new JLabel();
     label2.setText("Character Name");
     gbc = new GridBagConstraints();
     gbc.gridx = 1;
-    gbc.gridy = 3;
+    gbc.gridy = 4;
     gbc.anchor = GridBagConstraints.WEST;
     mainFrame.add(label2, gbc);
-    generateAndAddInjuryButton = new JButton();
-    generateAndAddInjuryButton.setText("Generate Injury and Add To Character");
-    gbc = new GridBagConstraints();
-    gbc.gridx = 6;
-    gbc.gridy = 8;
-    gbc.gridwidth = 5;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(generateAndAddInjuryButton, gbc);
     outputArea = new JTextPane();
     outputArea.setEditable(false);
     outputArea.setPreferredSize(new Dimension(450, 120));
     gbc = new GridBagConstraints();
     gbc.gridx = 1;
-    gbc.gridy = 11;
-    gbc.gridwidth = 10;
+    gbc.gridy = 12;
+    gbc.gridwidth = 12;
     gbc.fill = GridBagConstraints.BOTH;
+    gbc.insets = new Insets(5, 0, 0, 0);
     mainFrame.add(outputArea, gbc);
+    final JPanel spacer2 = new JPanel();
+    gbc = new GridBagConstraints();
+    gbc.gridx = 6;
+    gbc.gridy = 0;
+    gbc.fill = GridBagConstraints.VERTICAL;
+    mainFrame.add(spacer2, gbc);
     final JPanel spacer3 = new JPanel();
     gbc = new GridBagConstraints();
-    gbc.gridx = 2;
-    gbc.gridy = 0;
-    gbc.gridwidth = 3;
-    gbc.fill = GridBagConstraints.VERTICAL;
+    gbc.gridx = 0;
+    gbc.gridy = 7;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
     mainFrame.add(spacer3, gbc);
+    final JPanel spacer4 = new JPanel();
+    gbc = new GridBagConstraints();
+    gbc.gridx = 13;
+    gbc.gridy = 7;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(spacer4, gbc);
     final JLabel label3 = new JLabel();
     label3.setRequestFocusEnabled(true);
     label3.setText("All Possible Injuries");
     gbc = new GridBagConstraints();
     gbc.gridx = 1;
-    gbc.gridy = 9;
+    gbc.gridy = 10;
     gbc.anchor = GridBagConstraints.WEST;
     mainFrame.add(label3, gbc);
-    characterSelector = new JComboBox();
-    characterSelector.setEditable(false);
+    partyNameField = new JTextField();
+    partyNameField.setMinimumSize(new Dimension(64, 30));
+    partyNameField.setPreferredSize(new Dimension(64, 30));
     gbc = new GridBagConstraints();
-    gbc.gridx = 6;
+    gbc.gridx = 1;
+    gbc.gridy = 2;
+    gbc.gridwidth = 2;
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(partyNameField, gbc);
+    final JSeparator separator1 = new JSeparator();
+    gbc = new GridBagConstraints();
+    gbc.gridx = 1;
+    gbc.gridy = 9;
+    gbc.gridwidth = 6;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.insets = new Insets(5, 0, 5, 0);
+    mainFrame.add(separator1, gbc);
+    final JSeparator separator2 = new JSeparator();
+    gbc = new GridBagConstraints();
+    gbc.gridx = 1;
+    gbc.gridy = 3;
+    gbc.gridwidth = 12;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.insets = new Insets(5, 0, 5, 0);
+    mainFrame.add(separator2, gbc);
+    final JLabel label4 = new JLabel();
+    label4.setText("Current Party");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 8;
+    gbc.gridy = 1;
+    gbc.anchor = GridBagConstraints.WEST;
+    mainFrame.add(label4, gbc);
+    partySelector = new JComboBox();
+    gbc = new GridBagConstraints();
+    gbc.gridx = 8;
     gbc.gridy = 2;
     gbc.gridwidth = 5;
     gbc.anchor = GridBagConstraints.WEST;
     gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(characterSelector, gbc);
-    final JPanel spacer4 = new JPanel();
+    mainFrame.add(partySelector, gbc);
+    final JLabel label5 = new JLabel();
+    label5.setText("Party Name");
     gbc = new GridBagConstraints();
-    gbc.gridx = 0;
+    gbc.gridx = 1;
+    gbc.gridy = 1;
+    gbc.anchor = GridBagConstraints.WEST;
+    mainFrame.add(label5, gbc);
+    createPartyButton = new JButton();
+    createPartyButton.setText("Create Party");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 3;
+    gbc.gridy = 2;
+    gbc.gridwidth = 2;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(createPartyButton, gbc);
+    maxHealthField = new JTextField();
+    maxHealthField.setEditable(true);
+    maxHealthField.setMaximumSize(new Dimension(50, 30));
+    maxHealthField.setMinimumSize(new Dimension(50, 30));
+    maxHealthField.setPreferredSize(new Dimension(64, 30));
+    gbc = new GridBagConstraints();
+    gbc.gridx = 2;
     gbc.gridy = 5;
     gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(spacer4, gbc);
-    final JPanel spacer5 = new JPanel();
-    gbc = new GridBagConstraints();
-    gbc.gridx = 11;
-    gbc.gridy = 5;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(spacer5, gbc);
-    final JPanel spacer6 = new JPanel();
-    gbc = new GridBagConstraints();
-    gbc.gridx = 7;
-    gbc.gridy = 4;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(spacer6, gbc);
+    mainFrame.add(maxHealthField, gbc);
     spilloverField = new JTextField();
     spilloverField.setMinimumSize(new Dimension(64, 30));
     spilloverField.setPreferredSize(new Dimension(64, 30));
     gbc = new GridBagConstraints();
-    gbc.gridx = 6;
-    gbc.gridy = 4;
+    gbc.gridx = 8;
+    gbc.gridy = 8;
     gbc.anchor = GridBagConstraints.WEST;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     mainFrame.add(spilloverField, gbc);
-    final JLabel label4 = new JLabel();
-    label4.setText("Spillover");
-    gbc = new GridBagConstraints();
-    gbc.gridx = 6;
-    gbc.gridy = 3;
-    gbc.anchor = GridBagConstraints.WEST;
-    mainFrame.add(label4, gbc);
     rollValueField = new JTextField();
     rollValueField.setMinimumSize(new Dimension(64, 30));
     rollValueField.setPreferredSize(new Dimension(64, 30));
     gbc = new GridBagConstraints();
-    gbc.gridx = 8;
-    gbc.gridy = 4;
+    gbc.gridx = 10;
+    gbc.gridy = 8;
     gbc.anchor = GridBagConstraints.WEST;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     mainFrame.add(rollValueField, gbc);
-    final JLabel label5 = new JLabel();
-    label5.setText("Roll");
+    damageTypeSelector = new JComboBox();
+    gbc = new GridBagConstraints();
+    gbc.gridx = 12;
+    gbc.gridy = 8;
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(damageTypeSelector, gbc);
+    final JPanel spacer5 = new JPanel();
+    gbc = new GridBagConstraints();
+    gbc.gridx = 11;
+    gbc.gridy = 8;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(spacer5, gbc);
+    final JPanel spacer6 = new JPanel();
+    gbc = new GridBagConstraints();
+    gbc.gridx = 9;
+    gbc.gridy = 8;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(spacer6, gbc);
+    final JLabel label6 = new JLabel();
+    label6.setText("Spillover");
     gbc = new GridBagConstraints();
     gbc.gridx = 8;
-    gbc.gridy = 3;
+    gbc.gridy = 7;
     gbc.anchor = GridBagConstraints.WEST;
-    mainFrame.add(label5, gbc);
-    final JPanel spacer7 = new JPanel();
+    mainFrame.add(label6, gbc);
+    final JLabel label7 = new JLabel();
+    label7.setText("Roll");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 10;
+    gbc.gridy = 7;
+    gbc.anchor = GridBagConstraints.WEST;
+    mainFrame.add(label7, gbc);
+    final JLabel label8 = new JLabel();
+    label8.setText("Damage Type");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 12;
+    gbc.gridy = 7;
+    gbc.anchor = GridBagConstraints.WEST;
+    mainFrame.add(label8, gbc);
+    characterSelector = new JComboBox();
+    characterSelector.setEditable(false);
+    gbc = new GridBagConstraints();
+    gbc.gridx = 8;
+    gbc.gridy = 5;
+    gbc.gridwidth = 5;
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(characterSelector, gbc);
+    final JLabel label9 = new JLabel();
+    label9.setText("Current Character");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 8;
+    gbc.gridy = 4;
+    gbc.anchor = GridBagConstraints.WEST;
+    mainFrame.add(label9, gbc);
+    final JLabel label10 = new JLabel();
+    label10.setText("Max Health");
     gbc = new GridBagConstraints();
     gbc.gridx = 2;
-    gbc.gridy = 3;
-    gbc.weightx = 0.1;
+    gbc.gridy = 4;
+    gbc.anchor = GridBagConstraints.WEST;
+    mainFrame.add(label10, gbc);
+    addCharacterToPartyButton = new JButton();
+    addCharacterToPartyButton.setActionCommand("Add Character To Party");
+    addCharacterToPartyButton.setHorizontalTextPosition(0);
+    addCharacterToPartyButton.setText("Add To Party");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 3;
+    gbc.gridy = 5;
+    gbc.gridwidth = 2;
     gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(spacer7, gbc);
+    mainFrame.add(addCharacterToPartyButton, gbc);
+    savePartyButton = new JButton();
+    savePartyButton.setText("Save Party");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 5;
+    gbc.gridy = 2;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(savePartyButton, gbc);
+    loadPartyButton = new JButton();
+    loadPartyButton.setText("Load Party");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 6;
+    gbc.gridy = 2;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(loadPartyButton, gbc);
     describeInjuryButton = new JButton();
     describeInjuryButton.setText("Describe Injury");
     gbc = new GridBagConstraints();
+    gbc.gridx = 4;
+    gbc.gridy = 11;
+    gbc.gridwidth = 2;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(describeInjuryButton, gbc);
+    addInjuryButton = new JButton();
+    addInjuryButton.setText("Add Injury To Character");
+    gbc = new GridBagConstraints();
     gbc.gridx = 6;
+    gbc.gridy = 11;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(addInjuryButton, gbc);
+    final JSeparator separator3 = new JSeparator();
+    gbc = new GridBagConstraints();
+    gbc.gridx = 1;
+    gbc.gridy = 6;
+    gbc.gridwidth = 12;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.insets = new Insets(5, 0, 5, 0);
+    mainFrame.add(separator3, gbc);
+    final JSeparator separator4 = new JSeparator();
+    separator4.setOrientation(1);
+    gbc = new GridBagConstraints();
+    gbc.gridx = 7;
+    gbc.gridy = 7;
+    gbc.gridheight = 5;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.insets = new Insets(0, 5, 0, 5);
+    mainFrame.add(separator4, gbc);
+    final JSeparator separator5 = new JSeparator();
+    separator5.setOrientation(1);
+    gbc = new GridBagConstraints();
+    gbc.gridx = 7;
+    gbc.gridy = 4;
+    gbc.gridheight = 2;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.insets = new Insets(0, 5, 0, 5);
+    mainFrame.add(separator5, gbc);
+    final JPanel spacer7 = new JPanel();
+    gbc = new GridBagConstraints();
+    gbc.gridx = 7;
+    gbc.gridy = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(spacer7, gbc);
+    final JSeparator separator6 = new JSeparator();
+    separator6.setOrientation(1);
+    gbc = new GridBagConstraints();
+    gbc.gridx = 7;
+    gbc.gridy = 2;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.insets = new Insets(0, 5, 0, 5);
+    mainFrame.add(separator6, gbc);
+    final JPanel spacer8 = new JPanel();
+    gbc = new GridBagConstraints();
+    gbc.gridx = 3;
+    gbc.gridy = 1;
+    gbc.gridwidth = 2;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(spacer8, gbc);
+    generateAndAddInjuryButton = new JButton();
+    generateAndAddInjuryButton.setHorizontalTextPosition(0);
+    generateAndAddInjuryButton.setText("Generate Injury And Add To Character");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 8;
     gbc.gridy = 10;
     gbc.gridwidth = 5;
     gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(describeInjuryButton, gbc);
+    mainFrame.add(generateAndAddInjuryButton, gbc);
+    generateInjuryButton = new JButton();
+    generateInjuryButton.setText("Generate Injury");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 8;
+    gbc.gridy = 11;
+    gbc.gridwidth = 5;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(generateInjuryButton, gbc);
     removeSelectedInjuryButton = new JButton();
     removeSelectedInjuryButton.setText("Remove Selected Injury");
     gbc = new GridBagConstraints();
-    gbc.gridx = 1;
+    gbc.gridx = 6;
     gbc.gridy = 8;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     mainFrame.add(removeSelectedInjuryButton, gbc);
     describeExistingInjuryButton = new JButton();
     describeExistingInjuryButton.setText("Describe Selected Injury");
     gbc = new GridBagConstraints();
-    gbc.gridx = 2;
+    gbc.gridx = 4;
     gbc.gridy = 8;
-    gbc.gridwidth = 3;
+    gbc.gridwidth = 2;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     mainFrame.add(describeExistingInjuryButton, gbc);
-    final JLabel label6 = new JLabel();
-    label6.setText("Damage Type");
-    gbc = new GridBagConstraints();
-    gbc.gridx = 10;
-    gbc.gridy = 3;
-    gbc.gridwidth = 2;
-    gbc.anchor = GridBagConstraints.WEST;
-    mainFrame.add(label6, gbc);
-    damageTypeSelector = new JComboBox();
-    gbc = new GridBagConstraints();
-    gbc.gridx = 10;
-    gbc.gridy = 4;
-    gbc.anchor = GridBagConstraints.WEST;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(damageTypeSelector, gbc);
-    final JPanel spacer8 = new JPanel();
-    gbc = new GridBagConstraints();
-    gbc.gridx = 9;
-    gbc.gridy = 4;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(spacer8, gbc);
     generateRollBox = new JCheckBox();
     generateRollBox.setSelected(false);
     generateRollBox.setText("Auto-generate Roll");
     gbc = new GridBagConstraints();
-    gbc.gridx = 7;
-    gbc.gridy = 6;
-    gbc.gridwidth = 4;
-    mainFrame.add(generateRollBox, gbc);
-    final JPanel spacer9 = new JPanel();
-    gbc = new GridBagConstraints();
-    gbc.gridx = 4;
-    gbc.gridy = 7;
-    gbc.fill = GridBagConstraints.VERTICAL;
-    mainFrame.add(spacer9, gbc);
-    generateInjuryButton = new JButton();
-    generateInjuryButton.setText("Generate Injury");
-    gbc = new GridBagConstraints();
-    gbc.gridx = 6;
+    gbc.gridx = 10;
     gbc.gridy = 9;
-    gbc.gridwidth = 5;
+    gbc.gridwidth = 4;
+    gbc.anchor = GridBagConstraints.WEST;
+    mainFrame.add(generateRollBox, gbc);
+    removeCharacterFromPartyButton = new JButton();
+    removeCharacterFromPartyButton.setText("Remove From Party");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 5;
+    gbc.gridy = 5;
     gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(generateInjuryButton, gbc);
-    final JLabel label7 = new JLabel();
-    label7.setText("Current Character");
+    mainFrame.add(removeCharacterFromPartyButton, gbc);
+    updateCharacterButton = new JButton();
+    updateCharacterButton.setText("Update Character");
     gbc = new GridBagConstraints();
     gbc.gridx = 6;
-    gbc.gridy = 1;
-    gbc.anchor = GridBagConstraints.WEST;
-    mainFrame.add(label7, gbc);
-    maxHealthField = new JTextField();
-    maxHealthField.setEditable(true);
-    maxHealthField.setMinimumSize(new Dimension(64, 30));
-    maxHealthField.setPreferredSize(new Dimension(64, 30));
-    gbc = new GridBagConstraints();
-    gbc.gridx = 3;
-    gbc.gridy = 4;
-    gbc.anchor = GridBagConstraints.WEST;
+    gbc.gridy = 5;
     gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(maxHealthField, gbc);
-    final JLabel label8 = new JLabel();
-    label8.setText("Max Health");
-    gbc = new GridBagConstraints();
-    gbc.gridx = 3;
-    gbc.gridy = 3;
-    gbc.anchor = GridBagConstraints.WEST;
-    mainFrame.add(label8, gbc);
-    newCharacterButton = new JButton();
-    newCharacterButton.setText("New Character");
-    gbc = new GridBagConstraints();
-    gbc.gridx = 4;
-    gbc.gridy = 4;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    mainFrame.add(newCharacterButton, gbc);
+    mainFrame.add(updateCharacterButton, gbc);
+    label2.setLabelFor(characterNameField);
+    label3.setLabelFor(injuryDescriptionSelector);
+    label4.setLabelFor(partySelector);
+    label5.setLabelFor(partyNameField);
+    label6.setLabelFor(spilloverField);
+    label7.setLabelFor(rollValueField);
+    label8.setLabelFor(damageTypeSelector);
+    label9.setLabelFor(characterSelector);
+    label10.setLabelFor(maxHealthField);
   }
 
   /**
-   * @noinspection
+   * @noinspection ALL
    */
   public JComponent $$$getRootComponent$$$() {
     return mainFrame;
@@ -629,12 +889,12 @@ public class InjuryGenerator extends JFrame {
   private static class DnDFileFilter extends FileFilter {
     @Override
     public boolean accept(File f) {
-      return f.getName().endsWith(FILE_EXTENSION);
+      return f.getName().endsWith(PARTY_FILE_EXTENSION) || f.isDirectory();
     }
 
     @Override
     public String getDescription() {
-      return "Injury Calculator save files (*.dnd)";
+      return "Injury Calculator save files (*.pty)";
     }
   }
 }
