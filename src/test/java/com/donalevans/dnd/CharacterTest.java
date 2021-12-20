@@ -1,16 +1,11 @@
 package com.donalevans.dnd;
 
-import com.donalevans.dnd.Character;
-import com.donalevans.dnd.Injury;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -31,16 +26,15 @@ public class CharacterTest {
 
   @Test
   public void constructorPopulatesFields() {
-    assertThat(testCharacter.getName(), equalTo(characterName));
-    assertThat(testCharacter.getMaxHP(), equalTo(maxHP));
-    assertThat(testCharacter.getExistingInjuries().size(), equalTo(1));
-    assertThat(testCharacter.getExistingInjuries(), hasItem(mockInjury));
+    assertThat(testCharacter.getName()).isEqualTo(characterName);
+    assertThat(testCharacter.getMaxHP()).isEqualTo(maxHP);
+    assertThat(testCharacter.getExistingInjuries()).hasSize(1).contains(mockInjury);
   }
 
   @Test
   public void generateInjuryReturnsDeadWhenSpilloverIsMoreThanMaxHealth() {
     Injury injury = testCharacter.generateInjury(maxHP + 1, maxRoll, Injury.DamageType.ACID);
-    assertThat(injury.getDescription(), equalTo("Dead: You are dead!"));
+    assertThat(injury.getDescription()).isEqualTo("Dead: You are dead!");
   }
 
   @Test
@@ -52,11 +46,13 @@ public class CharacterTest {
 
     // Use method signature with no direction specified
     testCharacter.generateInjury(currentHP, damage, maxRoll, type);
-    verify(testCharacter, times(1)).generateInjury(expectedSpillover, maxRoll, type, Injury.Direction.NONE);
+    verify(testCharacter, times(1))
+        .generateInjury(expectedSpillover, maxRoll, type, Injury.Direction.NONE);
 
     // Use method signature with direction specified
     testCharacter.generateInjury(currentHP, damage, maxRoll, type, Injury.Direction.NONE);
-    verify(testCharacter, times(2)).generateInjury(expectedSpillover, maxRoll, type, Injury.Direction.NONE);
+    verify(testCharacter, times(2))
+        .generateInjury(expectedSpillover, maxRoll, type, Injury.Direction.NONE);
   }
 
   @Test
@@ -64,12 +60,10 @@ public class CharacterTest {
     Injury mockInjury_2 = mock(Injury.class);
     testCharacter.addInjury(mockInjury_2);
 
-    assertThat(testCharacter.getExistingInjuries().size(), equalTo(2));
-    assertThat(testCharacter.getExistingInjuries(), hasItems(mockInjury, mockInjury_2));
+    assertThat(testCharacter.getExistingInjuries()).hasSize(2).contains(mockInjury, mockInjury_2);
 
     testCharacter.removeInjury(mockInjury);
 
-    assertThat(testCharacter.getExistingInjuries().size(), equalTo(1));
-    assertThat(testCharacter.getExistingInjuries(), hasItems(mockInjury_2));
+    assertThat(testCharacter.getExistingInjuries()).hasSize(1).contains(mockInjury_2);
   }
 }

@@ -8,8 +8,7 @@ import org.junit.runners.Parameterized;
 
 import static com.donalevans.dnd.Util.firstCharToUppercase;
 import static com.donalevans.dnd.Util.formatName;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Enclosed.class)
 public class UtilTest {
@@ -39,8 +38,7 @@ public class UtilTest {
           });
     }
 
-    @Parameterized.Parameter
-    public String inputString;
+    @Parameterized.Parameter public String inputString;
 
     @Parameterized.Parameter(1)
     public String expectedString;
@@ -48,7 +46,7 @@ public class UtilTest {
     @Test
     @Parameterized.Parameters()
     public void formatNameReturnsCorrectlyFormattedName() {
-      assertThat(formatName(inputString), equalTo(expectedString));
+      assertThat(formatName(inputString)).isEqualTo(expectedString);
     }
   }
 
@@ -57,30 +55,29 @@ public class UtilTest {
     @Parameterized.Parameters(name = "{index}: input={0}; expected={1}")
     public static Iterable<Object[]> testStrings() {
       return Arrays.asList(
-              new Object[][] {
-                      {"TESTNAME", "TESTNAME"},
-                      {"testname", "Testname"},
-                      {"$testname", "$testname"},
-                      {"T_t", "T_t"},
-                      {"T", "T"},
-                      {"t", "T"},
-                      {" ", " "},
-                      {"    ", "    "},
-                      {"!", "!"},
-                      {"", ""},
-                      {null, ""}
-              });
+          new Object[][] {
+            {"TESTNAME", "TESTNAME"},
+            {"testname", "Testname"},
+            {"$testname", "$testname"},
+            {"T_t", "T_t"},
+            {"T", "T"},
+            {"t", "T"},
+            {" ", " "},
+            {"    ", "    "},
+            {"!", "!"},
+            {"", ""},
+            {null, ""}
+          });
     }
 
-    @Parameterized.Parameter
-    public String inputString;
+    @Parameterized.Parameter public String inputString;
 
     @Parameterized.Parameter(1)
     public String expectedString;
 
     @Test
     public void firstCharToUppercaseReturnsCorrectly() {
-      assertThat(firstCharToUppercase(inputString), equalTo(expectedString));
+      assertThat(firstCharToUppercase(inputString)).isEqualTo(expectedString);
     }
   }
 }

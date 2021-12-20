@@ -1,8 +1,5 @@
 package com.donalevans.dnd;
 
-import com.donalevans.dnd.Character;
-import com.donalevans.dnd.Injury;
-import com.donalevans.dnd.SaveFileIO;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,16 +8,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import static com.donalevans.dnd.SaveFileIO.FILE_EXTENSION;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static com.donalevans.dnd.SaveFileIO.PARTY_FILE_EXTENSION;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SaveFileIOTest {
-  @Rule
-  public TemporaryFolder folder = new TemporaryFolder();
+  @Rule public TemporaryFolder folder = new TemporaryFolder();
 
   @Test
-  public void saveCharacterAndLoadCharacterWritesAndReadsFile() throws IOException {
+  public void savePartyAndLoadPartyWritesAndReadsFile() throws IOException, ClassNotFoundException {
     SaveFileIO saveFileIO = new SaveFileIO();
     final String characterName = "Character Name";
     final int maxHP = 100;
@@ -42,13 +37,16 @@ public class SaveFileIOTest {
     existingInjuries.add(injury2);
     existingInjuries.add(injury3);
 
-    final Character testCharacter = new Character(characterName,maxHP, existingInjuries);
-    File saveFile = folder.newFile("test" + FILE_EXTENSION);
+    final Character testCharacter = new Character(characterName, maxHP, existingInjuries);
+    final String partyName = "Droop troop";
+    final Party testParty = new Party(partyName);
+    testParty.add(testCharacter);
+    File saveFile = folder.newFile("test" + PARTY_FILE_EXTENSION);
 
-    assertTrue(saveFileIO.saveCharacter(testCharacter, saveFile));
+    assertThat(saveFileIO.saveParty(testParty, saveFile)).isTrue();
 
-    Character loadedCharacter = saveFileIO.loadCharacter(saveFile);
+    Party loadedParty = saveFileIO.loadParty(saveFile);
 
-    assertEquals(loadedCharacter, testCharacter);
+    assertThat(testParty).isEqualTo(loadedParty);
   }
 }

@@ -1,6 +1,5 @@
 package com.donalevans.dnd;
 
-import com.donalevans.dnd.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,11 +9,8 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @RunWith(Enclosed.class)
 public class DurationTest {
@@ -23,35 +19,43 @@ public class DurationTest {
   public static class ParameterizedTests {
     @Parameterized.Parameters(name = "Duration unit: {0}")
     public static Iterable<Object[]> abstractDurations() {
-      return Arrays.asList(new Object[][] {
-              { new Duration(1, Duration.Unit.RESTS), "Invalid duration unit specified: RESTS" },
-              { new Duration(1, Duration.Unit.LONG_RESTS), "Invalid duration unit specified: LONG_RESTS" },
-              { new Duration(1, Duration.Unit.FOREVER), "Invalid duration unit specified: FOREVER" }
-      });
+      return Arrays.asList(
+          new Object[][] {
+            {new Duration(1, Duration.Unit.RESTS),
+                    "Invalid duration unit specified: RESTS"},
+            {new Duration(1, Duration.Unit.LONG_RESTS),
+              "Invalid duration unit specified: LONG_RESTS"},
+            {new Duration(1, Duration.Unit.FOREVER),
+                    "Invalid duration unit specified: FOREVER"}
+          });
     }
 
-    @Parameterized.Parameter
-    public Duration abstractDuration;
+    @Parameterized.Parameter public Duration abstractDuration;
 
     @Parameterized.Parameter(1)
     public String exceptionString;
 
     @Test
     public void conversionMethodsThrowWhenPassedAbstractDuration() {
-      Exception ex = assertThrows(IllegalArgumentException.class, () -> Duration.toRounds(abstractDuration));
-      assertThat(ex.getMessage(), equalTo(exceptionString));
+      assertThatThrownBy(() -> Duration.toRounds(abstractDuration))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage(exceptionString);
 
-      ex = assertThrows(IllegalArgumentException.class, () -> Duration.toMinutes(abstractDuration));
-      assertThat(ex.getMessage(), equalTo(exceptionString));
+      assertThatThrownBy(() -> Duration.toMinutes(abstractDuration))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage(exceptionString);
 
-      ex = assertThrows(IllegalArgumentException.class, () -> Duration.toHours(abstractDuration));
-      assertThat(ex.getMessage(), equalTo(exceptionString));
+      assertThatThrownBy(() -> Duration.toHours(abstractDuration))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage(exceptionString);
 
-      ex = assertThrows(IllegalArgumentException.class, () -> Duration.toDays(abstractDuration));
-      assertThat(ex.getMessage(), equalTo(exceptionString));
+      assertThatThrownBy(() -> Duration.toDays(abstractDuration))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage(exceptionString);
 
-      ex = assertThrows(IllegalArgumentException.class, () -> Duration.toWeeks(abstractDuration));
-      assertThat(ex.getMessage(), equalTo(exceptionString));
+      assertThatThrownBy(() -> Duration.toWeeks(abstractDuration))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage(exceptionString);
     }
   }
 
@@ -74,59 +78,59 @@ public class DurationTest {
 
     @Test
     public void toRoundsReturnsCorrectly() {
-      assertThat(Duration.toRounds(durations.get(oneWeek)), equalTo(144000));
-      assertThat(Duration.toRounds(durations.get(oneDay)), equalTo(14400));
-      assertThat(Duration.toRounds(durations.get(oneHour)), equalTo(600));
-      assertThat(Duration.toRounds(durations.get(oneMinute)), equalTo(10));
-      assertThat(Duration.toRounds(durations.get(oneRound)), equalTo(1));
+      assertThat(Duration.toRounds(durations.get(oneWeek))).isEqualTo(144000);
+      assertThat(Duration.toRounds(durations.get(oneDay))).isEqualTo(14400);
+      assertThat(Duration.toRounds(durations.get(oneHour))).isEqualTo(600);
+      assertThat(Duration.toRounds(durations.get(oneMinute))).isEqualTo(10);
+      assertThat(Duration.toRounds(durations.get(oneRound))).isEqualTo(1);
     }
 
     @Test
     public void toMinutesReturnsCorrectly() {
-      assertThat(Duration.toMinutes(durations.get(oneWeek)), equalTo(14400));
-      assertThat(Duration.toMinutes(durations.get(oneDay)), equalTo(1440));
-      assertThat(Duration.toMinutes(durations.get(oneHour)), equalTo(60));
-      assertThat(Duration.toMinutes(durations.get(oneMinute)), equalTo(1));
-      assertThat(Duration.toMinutes(durations.get(oneRound)), equalTo(0));
+      assertThat(Duration.toMinutes(durations.get(oneWeek))).isEqualTo(14400);
+      assertThat(Duration.toMinutes(durations.get(oneDay))).isEqualTo(1440);
+      assertThat(Duration.toMinutes(durations.get(oneHour))).isEqualTo(60);
+      assertThat(Duration.toMinutes(durations.get(oneMinute))).isEqualTo(1);
+      assertThat(Duration.toMinutes(durations.get(oneRound))).isEqualTo(0);
     }
 
     @Test
     public void toHoursReturnsCorrectly() {
-      assertThat(Duration.toHours(durations.get(oneWeek)), equalTo(240));
-      assertThat(Duration.toHours(durations.get(oneDay)), equalTo(24));
-      assertThat(Duration.toHours(durations.get(oneHour)), equalTo(1));
-      assertThat(Duration.toHours(durations.get(oneMinute)), equalTo(0));
-      assertThat(Duration.toHours(durations.get(oneRound)), equalTo(0));
+      assertThat(Duration.toHours(durations.get(oneWeek))).isEqualTo(240);
+      assertThat(Duration.toHours(durations.get(oneDay))).isEqualTo(24);
+      assertThat(Duration.toHours(durations.get(oneHour))).isEqualTo(1);
+      assertThat(Duration.toHours(durations.get(oneMinute))).isEqualTo(0);
+      assertThat(Duration.toHours(durations.get(oneRound))).isEqualTo(0);
     }
 
     @Test
     public void toDaysReturnsCorrectly() {
-      assertThat(Duration.toDays(durations.get(oneWeek)), equalTo(10));
-      assertThat(Duration.toDays(durations.get(oneDay)), equalTo(1));
-      assertThat(Duration.toDays(durations.get(oneHour)), equalTo(0));
-      assertThat(Duration.toDays(durations.get(oneMinute)), equalTo(0));
-      assertThat(Duration.toDays(durations.get(oneRound)), equalTo(0));
+      assertThat(Duration.toDays(durations.get(oneWeek))).isEqualTo(10);
+      assertThat(Duration.toDays(durations.get(oneDay))).isEqualTo(1);
+      assertThat(Duration.toDays(durations.get(oneHour))).isEqualTo(0);
+      assertThat(Duration.toDays(durations.get(oneMinute))).isEqualTo(0);
+      assertThat(Duration.toDays(durations.get(oneRound))).isEqualTo(0);
     }
 
     @Test
     public void toWeeksReturnsCorrectly() {
-      assertThat(Duration.toWeeks(durations.get(oneWeek)), equalTo(1));
-      assertThat(Duration.toWeeks(durations.get(oneDay)), equalTo(0));
-      assertThat(Duration.toWeeks(durations.get(oneHour)), equalTo(0));
-      assertThat(Duration.toWeeks(durations.get(oneMinute)), equalTo(0));
-      assertThat(Duration.toWeeks(durations.get(oneRound)), equalTo(0));
+      assertThat(Duration.toWeeks(durations.get(oneWeek))).isEqualTo(1);
+      assertThat(Duration.toWeeks(durations.get(oneDay))).isEqualTo(0);
+      assertThat(Duration.toWeeks(durations.get(oneHour))).isEqualTo(0);
+      assertThat(Duration.toWeeks(durations.get(oneMinute))).isEqualTo(0);
+      assertThat(Duration.toWeeks(durations.get(oneRound))).isEqualTo(0);
     }
 
     @Test
     public void isAbstractReturnsCorrectly() {
-      assertFalse(Duration.isAbstract(durations.get(oneWeek)));
-      assertFalse(Duration.isAbstract(durations.get(oneDay)));
-      assertFalse(Duration.isAbstract(durations.get(oneHour)));
-      assertFalse(Duration.isAbstract(durations.get(oneMinute)));
-      assertFalse(Duration.isAbstract(durations.get(oneRound)));
-      assertTrue(Duration.isAbstract(new Duration(1, Duration.Unit.RESTS)));
-      assertTrue(Duration.isAbstract(new Duration(1, Duration.Unit.LONG_RESTS)));
-      assertTrue(Duration.isAbstract(new Duration(1, Duration.Unit.FOREVER)));
+      assertThat(Duration.isAbstract(durations.get(oneWeek))).isFalse();
+      assertThat(Duration.isAbstract(durations.get(oneDay))).isFalse();
+      assertThat(Duration.isAbstract(durations.get(oneHour))).isFalse();
+      assertThat(Duration.isAbstract(durations.get(oneMinute))).isFalse();
+      assertThat(Duration.isAbstract(durations.get(oneRound))).isFalse();
+      assertThat(Duration.isAbstract(new Duration(1, Duration.Unit.RESTS))).isTrue();
+      assertThat(Duration.isAbstract(new Duration(1, Duration.Unit.LONG_RESTS))).isTrue();
+      assertThat(Duration.isAbstract(new Duration(1, Duration.Unit.FOREVER))).isTrue();
     }
   }
 }

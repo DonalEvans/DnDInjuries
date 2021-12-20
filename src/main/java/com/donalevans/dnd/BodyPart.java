@@ -16,7 +16,7 @@ public class BodyPart implements Serializable {
   public BodyPart() {}
 
   public BodyPart(Injury.Direction direction) {
-
+    //TODO: Implement this
   }
 
   @Override
