@@ -437,6 +437,15 @@
           <text value="Update Character"/>
         </properties>
       </component>
+      <component id="16c25" class="javax.swing.JButton" binding="addCustomInjuryButton">
+        <constraints>
+          <grid row="10" column="4" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="Add Custom Injury"/>
+        </properties>
+      </component>
     </children>
   </grid>
 </form>
