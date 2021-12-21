@@ -1,6 +1,7 @@
 package com.donalevans.dnd.ui;
 
 import com.donalevans.dnd.Character;
+import com.donalevans.dnd.CustomInjury;
 import com.donalevans.dnd.Injury;
 import com.donalevans.dnd.Party;
 import com.donalevans.dnd.SaveFileIO;
@@ -48,6 +49,7 @@ public class InjuryGenerator extends JFrame {
   private JButton describeInjuryButton;
   private JButton addInjuryButton;
   private JTextPane outputArea;
+  private JButton addCustomInjuryButton;
 
   private File previousSaveLoadLocation;
 
@@ -103,6 +105,8 @@ public class InjuryGenerator extends JFrame {
 
     addInjuryButton.addActionListener(e -> addSelectedInjuryToCharacter());
 
+    addCustomInjuryButton.addActionListener(e -> addCustomInjury());
+
     initComponents();
   }
 
@@ -113,7 +117,7 @@ public class InjuryGenerator extends JFrame {
                     item -> {
                       if (!item.equals(InjuryType.DEAD)
                               && !item.equals(InjuryType.INVALID_INJURY)
-                              && !item.equals(InjuryType.UNHARMED)) injuryDescriptionSelector.addItem(item);
+                              ) injuryDescriptionSelector.addItem(item);
                     });
   }
 
@@ -167,7 +171,13 @@ public class InjuryGenerator extends JFrame {
       throw new IllegalArgumentException(
               "Add character to party before adding or removing injuries.");
     }
-    Injury injury = getSelectedInjury();
+    addInjuryToCharacter(character, getSelectedInjury());
+  }
+
+  private void addInjuryToCharacter(Character character, Injury injury) {
+    if (injury == null || injury.getInjuryType().equals(InjuryType.UNHARMED)) {
+      return;
+    }
     character.addInjury(injury);
     characterUpdated();
     addItemToSelector(injury);
@@ -208,6 +218,7 @@ public class InjuryGenerator extends JFrame {
       setOutputAreaText(ex.getMessage());
       return;
     }
+    injuryDescriptionSelector.setSelectedItem(injury.getInjuryType());
     setOutputAreaText(injury.getDescription());
   }
 
@@ -219,13 +230,9 @@ public class InjuryGenerator extends JFrame {
       setOutputAreaText(ex.getMessage());
       return;
     }
+    injuryDescriptionSelector.setSelectedItem(injury.getInjuryType());
     Character character = Objects.requireNonNull(getSelectedCharacter());
-    if (!injury.getInjuryType().equals(InjuryType.UNHARMED)) {
-      character.addInjury(injury);
-      characterUpdated();
-      addItemToSelector(injury);
-      existingInjuriesSelector.setSelectedItem(injury);
-    }
+    addInjuryToCharacter(character, injury);
     setOutputAreaText(injury.getDescription());
   }
 
@@ -371,6 +378,48 @@ public class InjuryGenerator extends JFrame {
     }
   }
 
+  void addCustomInjury() {
+    Character character = getSelectedCharacter();
+    if (character == null) {
+      return;
+    }
+
+    JTextField nameField = new JTextField(5);
+    JTextArea descriptionField = new JTextArea(5, 10);
+    descriptionField.setLineWrap(true);
+
+    JPanel customInjuryPanel = getCustomInjuryPanel(nameField, descriptionField);
+
+    int result = JOptionPane.showConfirmDialog(null, customInjuryPanel, "Enter custom injury details", JOptionPane.OK_CANCEL_OPTION);
+    if (result != JOptionPane.OK_OPTION) {
+      return;
+    }
+
+    Injury customInjury = new CustomInjury(nameField.getText(), descriptionField.getText());
+    addInjuryToCharacter(character, customInjury);
+    setOutputAreaText(customInjury.getDescription());
+  }
+
+  @NotNull
+  private JPanel getCustomInjuryPanel(JTextField nameField, JTextArea descriptionField) {
+    JPanel customInjuryPanel = new JPanel();
+    customInjuryPanel.setSize(200, 100);
+    customInjuryPanel.setLayout(new GridBagLayout());
+    GridBagConstraints constraints = new GridBagConstraints();
+
+    JLabel nameLabel = new JLabel("Injury Name:", JLabel.TRAILING);
+    nameLabel.setLabelFor(nameField);
+    customInjuryPanel.add(nameLabel, constraints);
+    customInjuryPanel.add(nameField, constraints);
+
+    constraints.gridy = 1;
+    JLabel descriptionLabel = new JLabel("Injury Description:", JLabel.TRAILING);
+    descriptionLabel.setLabelFor(descriptionField);
+    customInjuryPanel.add(descriptionLabel, constraints);
+    customInjuryPanel.add(descriptionField, constraints);
+    return customInjuryPanel;
+  }
+
   // Test helper methods
   @NotNull
   Character createCharacter() {
@@ -492,6 +541,7 @@ public class InjuryGenerator extends JFrame {
    *
    * @noinspection ALL
    */
+  @SuppressWarnings("unchecked")
   private void $$$setupUI$$$() {
     mainFrame = new JPanel();
     mainFrame.setLayout(new GridBagLayout());
@@ -868,6 +918,14 @@ public class InjuryGenerator extends JFrame {
     gbc.gridy = 5;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     mainFrame.add(updateCharacterButton, gbc);
+    addCustomInjuryButton = new JButton();
+    addCustomInjuryButton.setText("Add Custom Injury");
+    gbc = new GridBagConstraints();
+    gbc.gridx = 4;
+    gbc.gridy = 10;
+    gbc.gridwidth = 3;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    mainFrame.add(addCustomInjuryButton, gbc);
     label2.setLabelFor(characterNameField);
     label3.setLabelFor(injuryDescriptionSelector);
     label4.setLabelFor(partySelector);
@@ -879,9 +937,6 @@ public class InjuryGenerator extends JFrame {
     label10.setLabelFor(maxHealthField);
   }
 
-  /**
-   * @noinspection ALL
-   */
   public JComponent $$$getRootComponent$$$() {
     return mainFrame;
   }

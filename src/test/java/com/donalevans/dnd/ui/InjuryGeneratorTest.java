@@ -168,6 +168,7 @@ public class InjuryGeneratorTest {
     doReturn(characterMock).when(injuryGenerator).getSelectedCharacter();
 
     Injury injuryMock = mock(Injury.class);
+    when(injuryMock.getInjuryType()).thenReturn(InjuryType.ANOSMIA);
     doReturn(injuryMock).when(injuryGenerator).getSelectedInjury();
 
     injuryGenerator.addSelectedInjuryToCharacter();
